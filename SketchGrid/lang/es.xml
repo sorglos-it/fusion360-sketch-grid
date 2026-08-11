@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Spanish. See en.xml for the reference set of keys. -->
+<strings language="es">
+
+  <!-- Command -->
+  <string key="cmd.name">Rejilla de boceto</string>
+  <string key="cmd.tooltip">Construye una rejilla de formas alrededor de un punto de boceto.
+Número fijo de columnas y filas, o tantas como quepan en un área.</string>
+
+  <!-- Inputs -->
+  <string key="in.point">Punto</string>
+  <string key="in.point.prompt">Selecciona un punto de boceto</string>
+  <string key="in.mode">Cantidad según</string>
+  <string key="mode.count">Columnas y filas</string>
+  <string key="mode.fill">Relleno de un área</string>
+  <string key="in.shape">Forma</string>
+  <string key="shape.rectangle">Rectángulo</string>
+  <string key="shape.ellipse">Círculo / elipse</string>
+  <string key="shape.slot">Ranura</string>
+  <string key="shape.polygon">Polígono</string>
+  <string key="in.sides">Lados</string>
+  <string key="in.width">Longitud (X)</string>
+  <string key="in.height">Profundidad (Y)</string>
+  <string key="in.gap_x">Separación X</string>
+  <string key="in.gap_y">Separación Y</string>
+  <string key="in.columns">Columnas</string>
+  <string key="in.rows">Filas</string>
+  <string key="in.area_width">Ancho del área</string>
+  <string key="in.area_height">Alto del área</string>
+  <string key="in.anchor">El punto está</string>
+  <string key="anchor.center">En el centro</string>
+  <string key="anchor.bottom_left">Abajo a la izquierda</string>
+  <string key="anchor.bottom_right">Abajo a la derecha</string>
+  <string key="anchor.top_left">Arriba a la izquierda</string>
+  <string key="anchor.top_right">Arriba a la derecha</string>
+  <string key="anchor.bottom_center">Abajo al centro</string>
+  <string key="anchor.top_center">Arriba al centro</string>
+  <string key="anchor.left_center">A la izquierda al centro</string>
+  <string key="anchor.right_center">A la derecha al centro</string>
+  <string key="in.info">Resultado</string>
+  <string key="info.result">{0} × {1} = {2} formas, {3} × {4} mm en total</string>
+
+  <!-- Validation -->
+  <string key="err.no_point">Selecciona exactamente un punto de boceto.</string>
+  <string key="err.width">La longitud debe ser mayor que 0.</string>
+  <string key="err.height">La profundidad debe ser mayor que 0.</string>
+  <string key="err.gap_negative">La separación no puede ser negativa.</string>
+  <string key="err.columns">Se necesita al menos una columna.</string>
+  <string key="err.rows">Se necesita al menos una fila.</string>
+  <string key="err.area_positive">El área debe ser mayor que 0 en ambas direcciones.</string>
+  <string key="err.area_too_small">En esa área no cabe ni una sola forma. Se necesitan al menos {0} × {1} mm.</string>
+  <string key="err.sides">Un polígono necesita entre {0} y {1} lados.</string>
+  <string key="err.too_many">Serían {0} formas. Como máximo se permiten {1} - más bloquearía Fusion.</string>
+
+  <!-- Message boxes -->
+  <string key="msg.panel_missing">No se encontró ningún panel de barra de herramientas adecuado.</string>
+  <string key="msg.exec_failed">Error al crear la geometría:
+{0}</string>
+  <string key="msg.dialog_failed">Error al construir el cuadro de diálogo:
+{0}</string>
+  <string key="msg.run_failed">Error al iniciar:
+{0}</string>
+  <string key="msg.stop_failed">Error al detener:
+{0}</string>
+
+</strings>

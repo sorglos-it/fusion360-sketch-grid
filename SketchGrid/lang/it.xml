@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Italian. See en.xml for the reference set of keys. -->
+<strings language="it">
+
+  <!-- Command -->
+  <string key="cmd.name">Griglia di schizzo</string>
+  <string key="cmd.tooltip">Costruisce una griglia di forme attorno a un punto di schizzo.
+Numero fisso di colonne e righe, oppure quante ne stanno in un'area.</string>
+
+  <!-- Inputs -->
+  <string key="in.point">Punto</string>
+  <string key="in.point.prompt">Seleziona un punto di schizzo</string>
+  <string key="in.mode">Numero da</string>
+  <string key="mode.count">Colonne e righe</string>
+  <string key="mode.fill">Riempimento di un'area</string>
+  <string key="in.shape">Forma</string>
+  <string key="shape.rectangle">Rettangolo</string>
+  <string key="shape.ellipse">Cerchio / ellisse</string>
+  <string key="shape.slot">Asola</string>
+  <string key="shape.polygon">Poligono</string>
+  <string key="in.sides">Lati</string>
+  <string key="in.width">Lunghezza (X)</string>
+  <string key="in.height">Profondità (Y)</string>
+  <string key="in.gap_x">Distanza X</string>
+  <string key="in.gap_y">Distanza Y</string>
+  <string key="in.columns">Colonne</string>
+  <string key="in.rows">Righe</string>
+  <string key="in.area_width">Larghezza dell'area</string>
+  <string key="in.area_height">Altezza dell'area</string>
+  <string key="in.anchor">Il punto si trova</string>
+  <string key="anchor.center">Al centro</string>
+  <string key="anchor.bottom_left">In basso a sinistra</string>
+  <string key="anchor.bottom_right">In basso a destra</string>
+  <string key="anchor.top_left">In alto a sinistra</string>
+  <string key="anchor.top_right">In alto a destra</string>
+  <string key="anchor.bottom_center">In basso al centro</string>
+  <string key="anchor.top_center">In alto al centro</string>
+  <string key="anchor.left_center">A sinistra al centro</string>
+  <string key="anchor.right_center">A destra al centro</string>
+  <string key="in.info">Risultato</string>
+  <string key="info.result">{0} × {1} = {2} forme, {3} × {4} mm in totale</string>
+
+  <!-- Validation -->
+  <string key="err.no_point">Seleziona esattamente un punto di schizzo.</string>
+  <string key="err.width">La lunghezza deve essere maggiore di 0.</string>
+  <string key="err.height">La profondità deve essere maggiore di 0.</string>
+  <string key="err.gap_negative">La distanza non può essere negativa.</string>
+  <string key="err.columns">Serve almeno una colonna.</string>
+  <string key="err.rows">Serve almeno una riga.</string>
+  <string key="err.area_positive">L'area deve essere maggiore di 0 in entrambe le direzioni.</string>
+  <string key="err.area_too_small">In quest'area non entra nemmeno una forma. Servono almeno {0} × {1} mm.</string>
+  <string key="err.sides">Un poligono richiede da {0} a {1} lati.</string>
+  <string key="err.too_many">Sarebbero {0} forme. Ne sono consentite al massimo {1} - oltre, Fusion si blocca.</string>
+
+  <!-- Message boxes -->
+  <string key="msg.panel_missing">Nessun pannello della barra degli strumenti adatto trovato.</string>
+  <string key="msg.exec_failed">Errore durante la creazione della geometria:
+{0}</string>
+  <string key="msg.dialog_failed">Errore durante la costruzione della finestra di dialogo:
+{0}</string>
+  <string key="msg.run_failed">Avvio non riuscito:
+{0}</string>
+  <string key="msg.stop_failed">Arresto non riuscito:
+{0}</string>
+
+</strings>

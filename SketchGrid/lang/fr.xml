@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- French. See en.xml for the reference set of keys. -->
+<strings language="fr">
+
+  <!-- Command -->
+  <string key="cmd.name">Grille d'esquisse</string>
+  <string key="cmd.tooltip">Construit une grille de formes autour d'un point d'esquisse.
+Nombre fixe de colonnes et de lignes, ou autant qu'il en tient dans une zone.</string>
+
+  <!-- Inputs -->
+  <string key="in.point">Point</string>
+  <string key="in.point.prompt">Sélectionner un point d'esquisse</string>
+  <string key="in.mode">Nombre selon</string>
+  <string key="mode.count">Colonnes et lignes</string>
+  <string key="mode.fill">Remplissage d'une zone</string>
+  <string key="in.shape">Forme</string>
+  <string key="shape.rectangle">Rectangle</string>
+  <string key="shape.ellipse">Cercle / ellipse</string>
+  <string key="shape.slot">Trou oblong</string>
+  <string key="shape.polygon">Polygone</string>
+  <string key="in.sides">Côtés</string>
+  <string key="in.width">Longueur (X)</string>
+  <string key="in.height">Profondeur (Y)</string>
+  <string key="in.gap_x">Écart X</string>
+  <string key="in.gap_y">Écart Y</string>
+  <string key="in.columns">Colonnes</string>
+  <string key="in.rows">Lignes</string>
+  <string key="in.area_width">Largeur de la zone</string>
+  <string key="in.area_height">Hauteur de la zone</string>
+  <string key="in.anchor">Le point est</string>
+  <string key="anchor.center">Au centre</string>
+  <string key="anchor.bottom_left">En bas à gauche</string>
+  <string key="anchor.bottom_right">En bas à droite</string>
+  <string key="anchor.top_left">En haut à gauche</string>
+  <string key="anchor.top_right">En haut à droite</string>
+  <string key="anchor.bottom_center">En bas au centre</string>
+  <string key="anchor.top_center">En haut au centre</string>
+  <string key="anchor.left_center">À gauche au centre</string>
+  <string key="anchor.right_center">À droite au centre</string>
+  <string key="in.info">Résultat</string>
+  <string key="info.result">{0} × {1} = {2} formes, {3} × {4} mm au total</string>
+
+  <!-- Validation -->
+  <string key="err.no_point">Sélectionnez exactement un point d'esquisse.</string>
+  <string key="err.width">La longueur doit être supérieure à 0.</string>
+  <string key="err.height">La profondeur doit être supérieure à 0.</string>
+  <string key="err.gap_negative">L'écart ne peut pas être négatif.</string>
+  <string key="err.columns">Au moins une colonne est nécessaire.</string>
+  <string key="err.rows">Au moins une ligne est nécessaire.</string>
+  <string key="err.area_positive">La zone doit être supérieure à 0 dans les deux directions.</string>
+  <string key="err.area_too_small">Pas même une forme ne tient dans cette zone. Il faut au moins {0} × {1} mm.</string>
+  <string key="err.sides">Un polygone a besoin de {0} à {1} côtés.</string>
+  <string key="err.too_many">Cela ferait {0} formes. Au maximum {1} sont autorisées - au-delà, Fusion se bloque.</string>
+
+  <!-- Message boxes -->
+  <string key="msg.panel_missing">Aucun panneau de barre d'outils approprié n'a été trouvé.</string>
+  <string key="msg.exec_failed">Erreur lors de la création de la géométrie :
+{0}</string>
+  <string key="msg.dialog_failed">Erreur lors de la construction de la boîte de dialogue :
+{0}</string>
+  <string key="msg.run_failed">Échec du démarrage :
+{0}</string>
+  <string key="msg.stop_failed">Échec de l'arrêt :
+{0}</string>
+
+</strings>

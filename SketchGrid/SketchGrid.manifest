@@ -1,0 +1,17 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "addin",
+    "id": "46cf9527-aab0-411b-9273-0c25590ce174",
+    "author": "Thomas Weirich",
+    "description": {
+        "": "Builds a grid of rectangles, ellipses, slots or polygons around a sketch point - a fixed count, or as many as fit into an area.",
+        "de-DE": "Baut ein Raster aus Rechtecken, Ellipsen, Langloechern oder Vielecken um einen Skizzenpunkt - feste Anzahl oder so viele wie in eine Flaeche passen.",
+        "es-ES": "Construye una rejilla de rectangulos, elipses, ranuras o poligonos alrededor de un punto de boceto: cantidad fija o tantas como quepan en un area.",
+        "fr-FR": "Construit une grille de rectangles, ellipses, trous oblongs ou polygones autour d'un point d'esquisse : nombre fixe ou autant qu'il en tient dans une zone.",
+        "it-IT": "Costruisce una griglia di rettangoli, ellissi, asole o poligoni attorno a un punto di schizzo: numero fisso o quante ne stanno in un'area."
+    },
+    "version": "1.0.0",
+    "runOnStartup": true,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}

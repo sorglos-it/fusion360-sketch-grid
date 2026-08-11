@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Reference language file. Every other file in this folder may omit keys;
+  anything missing falls back to the value defined here.
+  Placeholders {0}, {1}, ... are filled in by the add-in and must survive
+  translation. tools/test_sketchgrid.py checks both for every language.
+-->
+<strings language="en">
+
+  <!-- Command -->
+  <string key="cmd.name">Sketch Grid</string>
+  <string key="cmd.tooltip">Builds a grid of shapes around a sketch point.
+Fixed number of columns and rows, or as many as fit into an area.</string>
+
+  <!-- Inputs -->
+  <string key="in.point">Point</string>
+  <string key="in.point.prompt">Select a sketch point</string>
+  <string key="in.mode">Count from</string>
+  <string key="mode.count">Columns and rows</string>
+  <string key="mode.fill">Fitting an area</string>
+  <string key="in.shape">Shape</string>
+  <string key="shape.rectangle">Rectangle</string>
+  <string key="shape.ellipse">Circle / ellipse</string>
+  <string key="shape.slot">Slot</string>
+  <string key="shape.polygon">Polygon</string>
+  <string key="in.sides">Sides</string>
+  <string key="in.width">Length (X)</string>
+  <string key="in.height">Depth (Y)</string>
+  <string key="in.gap_x">Gap X</string>
+  <string key="in.gap_y">Gap Y</string>
+  <string key="in.columns">Columns</string>
+  <string key="in.rows">Rows</string>
+  <string key="in.area_width">Area width</string>
+  <string key="in.area_height">Area height</string>
+  <string key="in.anchor">Point sits</string>
+  <string key="anchor.center">In the middle</string>
+  <string key="anchor.bottom_left">Bottom left</string>
+  <string key="anchor.bottom_right">Bottom right</string>
+  <string key="anchor.top_left">Top left</string>
+  <string key="anchor.top_right">Top right</string>
+  <string key="anchor.bottom_center">Bottom centre</string>
+  <string key="anchor.top_center">Top centre</string>
+  <string key="anchor.left_center">Left centre</string>
+  <string key="anchor.right_center">Right centre</string>
+  <string key="in.info">Result</string>
+  <string key="info.result">{0} × {1} = {2} shapes, {3} × {4} mm overall</string>
+
+  <!-- Validation -->
+  <string key="err.no_point">Please select exactly one sketch point.</string>
+  <string key="err.width">The length must be greater than 0.</string>
+  <string key="err.height">The depth must be greater than 0.</string>
+  <string key="err.gap_negative">The gap must not be negative.</string>
+  <string key="err.columns">At least one column is required.</string>
+  <string key="err.rows">At least one row is required.</string>
+  <string key="err.area_positive">The area must be greater than 0 in both directions.</string>
+  <string key="err.area_too_small">Not even one shape fits into that area. It needs at least {0} × {1} mm.</string>
+  <string key="err.sides">A polygon needs between {0} and {1} sides.</string>
+  <string key="err.too_many">That would be {0} shapes. At most {1} are allowed - more would lock Fusion up.</string>
+
+  <!-- Message boxes -->
+  <string key="msg.panel_missing">No suitable toolbar panel was found.</string>
+  <string key="msg.exec_failed">Error while creating the geometry:
+{0}</string>
+  <string key="msg.dialog_failed">Error while building the dialog:
+{0}</string>
+  <string key="msg.run_failed">Start-up failed:
+{0}</string>
+  <string key="msg.stop_failed">Shutdown failed:
+{0}</string>
+
+</strings>
