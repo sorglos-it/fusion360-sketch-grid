@@ -63,7 +63,62 @@ check(abs(total_h - 26 * MM) < 1e-12,
       'total height 4*5 + 3*2 = 26 mm (%.2f)' % (total_h * 10))
 check(len(sg.cell_centres(layout())) == 32, '32 cells produced')
 
-print('2) Anchor decides where the picked point sits')
+print('2) Every anchor entry has the factors its name promises')
+
+
+def factors_from_name(key):
+    """Derive the expected factors from the key, so a mismatch between the
+    label and the maths cannot slip through unnoticed."""
+    name = key.split('.', 1)[1]
+    if name == 'center':
+        return (0.5, 0.5)
+    factor_x = factor_y = 0.5
+    for part in name.split('_'):
+        if part == 'left':
+            factor_x = 0.0
+        elif part == 'right':
+            factor_x = 1.0
+        elif part == 'bottom':
+            factor_y = 0.0
+        elif part == 'top':
+            factor_y = 1.0
+    return (factor_x, factor_y)
+
+
+for index, key in enumerate(sg.ANCHOR_KEYS):
+    check(sg.ANCHOR_FACTORS[index] == factors_from_name(key),
+          '%s -> %s' % (key, sg.ANCHOR_FACTORS[index]))
+
+# And the same again from the other end: where does the point actually land in
+# the bounding box the grid occupies?
+for index, key in enumerate(sg.ANCHOR_KEYS):
+    result = layout(anchor=index)
+    left, bottom = result[6], result[7]
+    right, top = left + result[4], bottom + result[5]
+    name = key.split('.', 1)[1]
+    on_left = abs(left) < 1e-12
+    on_right = abs(right) < 1e-12
+    on_bottom = abs(bottom) < 1e-12
+    on_top = abs(top) < 1e-12
+    middle_x = abs(left + right) < 1e-12
+    middle_y = abs(bottom + top) < 1e-12
+    if 'left' in name:
+        ok_x = on_left
+    elif 'right' in name:
+        ok_x = on_right
+    else:
+        ok_x = middle_x
+    if 'bottom' in name:
+        ok_y = on_bottom
+    elif 'top' in name:
+        ok_y = on_top
+    else:
+        ok_y = middle_y
+    check(ok_x and ok_y,
+          '%s: point at x %.0f..%.0f, y %.0f..%.0f mm'
+          % (key, left * 10, right * 10, bottom * 10, top * 10))
+
+print('2b) Anchor decides where the picked point sits')
 for index, key in enumerate(sg.ANCHOR_KEYS):
     fx, fy = sg.ANCHOR_FACTORS[index]
     result = layout(anchor=index)

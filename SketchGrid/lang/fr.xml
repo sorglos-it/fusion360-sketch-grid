@@ -27,7 +27,7 @@ Nombre fixe de colonnes et de lignes, ou autant qu'il en tient dans une zone.</s
   <string key="in.rows">Lignes</string>
   <string key="in.area_width">Largeur de la zone</string>
   <string key="in.area_height">Hauteur de la zone</string>
-  <string key="in.anchor">Le point est</string>
+  <string key="in.anchor">Le point est dans la grille</string>
   <string key="anchor.center">Au centre</string>
   <string key="anchor.bottom_left">En bas à gauche</string>
   <string key="anchor.bottom_right">En bas à droite</string>

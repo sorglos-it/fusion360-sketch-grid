@@ -27,7 +27,7 @@ Numero fisso di colonne e righe, oppure quante ne stanno in un'area.</string>
   <string key="in.rows">Righe</string>
   <string key="in.area_width">Larghezza dell'area</string>
   <string key="in.area_height">Altezza dell'area</string>
-  <string key="in.anchor">Il punto si trova</string>
+  <string key="in.anchor">Il punto si trova nella griglia</string>
   <string key="anchor.center">Al centro</string>
   <string key="anchor.bottom_left">In basso a sinistra</string>
   <string key="anchor.bottom_right">In basso a destra</string>

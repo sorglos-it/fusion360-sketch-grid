@@ -27,7 +27,7 @@ Número fijo de columnas y filas, o tantas como quepan en un área.</string>
   <string key="in.rows">Filas</string>
   <string key="in.area_width">Ancho del área</string>
   <string key="in.area_height">Alto del área</string>
-  <string key="in.anchor">El punto está</string>
+  <string key="in.anchor">El punto está en la rejilla</string>
   <string key="anchor.center">En el centro</string>
   <string key="anchor.bottom_left">Abajo a la izquierda</string>
   <string key="anchor.bottom_right">Abajo a la derecha</string>

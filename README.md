@@ -80,15 +80,29 @@ Worked example, the one the add-in was built around: length 10 mm, depth 5 mm, g
 
 ## Anchor
 
-The picked point can sit at any of nine positions in the grid's bounding box:
+The field is called **Point sits in the grid**, and that is exactly what it says: where the point you clicked ends up *inside* the finished grid. It is not the direction the grid grows in — that is the opposite of each entry. A point sitting at the bottom left means the grid extends up and to the right of it.
+
+Nine positions, here with a 3 × 2 grid, `X` the picked point and `#` the shapes:
 
 ```
-top_left     top_center     top_right
-left_center    center     right_center
-bottom_left bottom_center bottom_right
+  Bottom left          Left centre          Top right
+  #####.#####.#####    #####.#####.#####    #####.#####.####X
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  .................    X................    .................
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  X####.#####.#####    #####.#####.#####    #####.#####.#####
+
+  Bottom centre        In the middle        Right centre
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  .................    ........X........    ................X
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  #####.##X##.#####    #####.#####.#####    #####.#####.#####
 ```
 
-`center` is the default and grows the grid symmetrically in all four directions. `bottom_left` puts the point exactly at the lower left corner and grows the grid to the right and up. For the 8 × 4 example, centred means the grid starts 47 mm left and 13 mm below the point.
+`In the middle` is the default and grows the grid symmetrically in all four directions. For the 8 × 4 example that puts the lower left corner 47 mm left and 13 mm below the point. `Bottom left` puts the point exactly on the lower left corner, so the grid occupies the space up and to the right of it.
+
+`tools/test_sketchgrid.py` derives the expected factors from each entry's own name and checks them both ways round, so a label that disagrees with the geometry fails the suite.
 
 ## Shapes
 

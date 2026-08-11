@@ -27,7 +27,7 @@ Feste Anzahl Spalten und Zeilen, oder so viele wie in eine Fläche passen.</stri
   <string key="in.rows">Zeilen</string>
   <string key="in.area_width">Breite der Fläche</string>
   <string key="in.area_height">Höhe der Fläche</string>
-  <string key="in.anchor">Punkt liegt</string>
+  <string key="in.anchor">Punkt liegt im Raster</string>
   <string key="anchor.center">In der Mitte</string>
   <string key="anchor.bottom_left">Unten links</string>
   <string key="anchor.bottom_right">Unten rechts</string>

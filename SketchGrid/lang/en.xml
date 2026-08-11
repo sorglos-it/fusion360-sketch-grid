@@ -32,7 +32,7 @@ Fixed number of columns and rows, or as many as fit into an area.</string>
   <string key="in.rows">Rows</string>
   <string key="in.area_width">Area width</string>
   <string key="in.area_height">Area height</string>
-  <string key="in.anchor">Point sits</string>
+  <string key="in.anchor">Point sits in the grid</string>
   <string key="anchor.center">In the middle</string>
   <string key="anchor.bottom_left">Bottom left</string>
   <string key="anchor.bottom_right">Bottom right</string>
