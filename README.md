@@ -42,7 +42,7 @@ See also **[fusion360-dovetail](https://github.com/sorglos-it/fusion360-dovetail
    | macOS | `~/Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns/` |
 
 2. In Fusion: **Utilities → ADD-INS → Add-Ins**, select the entry, tick *Run on Startup*, press **Run**.
-3. The button appears on the **SKETCH** tab in the **CREATE** panel.
+3. The button appears on the **SKETCH** tab in the **CREATE** panel, with the installed version in brackets after its name.
 
 ## Usage
 
@@ -67,7 +67,6 @@ Worked example, the one the add-in was built around: length 10 mm, depth 5 mm, g
 | **Area width** / **Area height** | Fill mode: the space to fill. |
 | **Point sits** | Where the picked point is in the grid: middle, a corner, or the middle of an edge. |
 | **Result** | Read-only: how many shapes and how big the grid comes out. |
-| *(bottom right)* | The installed version, read from the manifest. |
 
 ## The two modes
 

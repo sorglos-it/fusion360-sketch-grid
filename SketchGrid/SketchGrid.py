@@ -50,7 +50,6 @@ IN_AREA_WIDTH = 'sgAreaWidth'
 IN_AREA_HEIGHT = 'sgAreaHeight'
 IN_ANCHOR = 'sgAnchor'
 IN_INFO = 'sgInfo'
-IN_VERSION = 'sgVersion'
 
 RESOURCE_FOLDER = os.path.join(_DIR, 'resources', 'SketchGrid')
 LANG_DIR = os.path.join(_DIR, 'lang')
@@ -405,8 +404,6 @@ def build_inputs(inputs):
         anchor.listItems.add(T(key), index == _last[IN_ANCHOR])
 
     inputs.addTextBoxCommandInput(IN_INFO, T('in.info'), '', 1, True)
-    core.add_version_label(inputs, IN_VERSION,
-                           core.read_version(_DIR, 'SketchGrid'))
     return selection
 
 
@@ -537,7 +534,9 @@ def run(context):
 
         icons = RESOURCE_FOLDER if os.path.isdir(RESOURCE_FOLDER) else ''
         definition = ui.commandDefinitions.addButtonDefinition(
-            CMD_ID, T('cmd.name'), T('cmd.tooltip'), icons)
+            CMD_ID,
+            core.display_name(T('cmd.name'), core.read_version(_DIR, 'SketchGrid')),
+            T('cmd.tooltip'), icons)
         _handlers.add(definition.commandCreated, CommandCreatedHandler())
 
         panel = core.find_panel(ui, WORKSPACE_ID, PANEL_IDS)
