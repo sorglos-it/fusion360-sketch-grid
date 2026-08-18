@@ -37,6 +37,9 @@ Feste Anzahl Spalten und Zeilen, oder so viele wie in eine Fläche passen.</stri
   <string key="anchor.top_center">Oben mittig</string>
   <string key="anchor.left_center">Links mittig</string>
   <string key="anchor.right_center">Rechts mittig</string>
+  <string key="in.offset_x">Versatz X</string>
+  <string key="in.offset_y">Versatz Y</string>
+  <string key="offset.tooltip">Verschiebt das ganze Raster gegenüber dem gewählten Punkt, zusätzlich zum Bezugspunkt. Damit hältst du einen Rand zu einer Kante ein, ohne den Punkt selbst zu versetzen. Negative Werte gehen in die andere Richtung.</string>
   <string key="in.info">Ergebnis</string>
   <string key="info.result">{0} × {1} = {2} Formen, {3} × {4} mm gesamt</string>
 

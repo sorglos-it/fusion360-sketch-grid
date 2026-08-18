@@ -39,9 +39,9 @@ def check(condition, message):
 
 def layout(mode=sg.MODE_COUNT, width=10 * MM, height=5 * MM, gap_x=2 * MM,
            gap_y=2 * MM, columns=8, rows=4, area_width=100 * MM,
-           area_height=40 * MM, anchor=0):
+           area_height=40 * MM, anchor=0, offset_x=0.0, offset_y=0.0):
     return sg.grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
-                          area_width, area_height, anchor)
+                          area_width, area_height, anchor, offset_x, offset_y)
 
 
 def expect_error(key, label, **kwargs):
@@ -214,7 +214,44 @@ for code in sg.core.SUPPORTED_LANGUAGES:
     check(all(value.strip() for value in values.values()),
           '%s.xml has no empty texts' % code)
 
-print('7) Every drop-down entry has a text of its own')
+print('7) Offset from the picked point')
+base = layout(anchor=1)                       # bottom left, grid starts at the point
+moved = layout(anchor=1, offset_x=2 * MM, offset_y=2 * MM)
+check(abs(moved[6] - base[6] - 2 * MM) < 1e-12
+      and abs(moved[7] - base[7] - 2 * MM) < 1e-12,
+      'the whole grid moves by the offset (%.1f / %.1f mm)'
+      % ((moved[6] - base[6]) * 10, (moved[7] - base[7]) * 10))
+check(abs(moved[6] - 2 * MM) < 1e-12 and abs(moved[7] - 2 * MM) < 1e-12,
+      'the case from the brief: point at 0/0, grid starts at 2/2')
+check(moved[:6] == base[:6],
+      'count, pitch and overall size are untouched by the offset')
+
+negative = layout(anchor=1, offset_x=-3 * MM, offset_y=-1.5 * MM)
+check(abs(negative[6] + 3 * MM) < 1e-12 and abs(negative[7] + 1.5 * MM) < 1e-12,
+      'negative values go the other way (%.1f / %.1f mm)'
+      % (negative[6] * 10, negative[7] * 10))
+
+for anchor in range(len(sg.ANCHOR_KEYS)):
+    plain = layout(anchor=anchor)
+    shifted = layout(anchor=anchor, offset_x=7 * MM, offset_y=-4 * MM)
+    check(abs(shifted[6] - plain[6] - 7 * MM) < 1e-12
+          and abs(shifted[7] - plain[7] + 4 * MM) < 1e-12,
+          '%s: the offset adds to the anchor rather than replacing it'
+          % sg.ANCHOR_KEYS[anchor])
+
+cells_plain = sg.cell_centres(layout(anchor=1))
+cells_moved = sg.cell_centres(layout(anchor=1, offset_x=2 * MM, offset_y=2 * MM))
+check(all(abs(b[0] - a[0] - 2 * MM) < 1e-12 and abs(b[1] - a[1] - 2 * MM) < 1e-12
+          for a, b in zip(cells_plain, cells_moved)),
+      'every one of the %d cells moves by the same amount' % len(cells_plain))
+
+check(layout(mode=sg.MODE_FILL, offset_x=50 * MM)[0]
+      == layout(mode=sg.MODE_FILL)[0],
+      'in fill mode the offset does not change how many fit')
+
+print('8) Every drop-down entry has a text of its own')
+for key in ('in.offset_x', 'in.offset_y', 'offset.tooltip'):
+    check(key in reference, '%s present' % key)
 for label, keys in (('mode', sg.MODE_KEYS), ('shape', sg.SHAPE_KEYS),
                     ('anchor', sg.ANCHOR_KEYS)):
     missing = [key for key in keys if key not in reference]
@@ -223,7 +260,7 @@ for label, keys in (('mode', sg.MODE_KEYS), ('shape', sg.SHAPE_KEYS),
 check(len(sg.ANCHOR_KEYS) == len(sg.ANCHOR_FACTORS),
       'every anchor entry has a factor pair')
 
-print('8) Text catalogue')
+print('9) Text catalogue')
 for code in sg.core.SUPPORTED_LANGUAGES:
     sg.S.load(code)
     check(sg.S.code == code and sg.T('cmd.name') != 'cmd.name',

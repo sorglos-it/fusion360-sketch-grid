@@ -42,6 +42,9 @@ Fixed number of columns and rows, or as many as fit into an area.</string>
   <string key="anchor.top_center">Top centre</string>
   <string key="anchor.left_center">Left centre</string>
   <string key="anchor.right_center">Right centre</string>
+  <string key="in.offset_x">Offset X</string>
+  <string key="in.offset_y">Offset Y</string>
+  <string key="offset.tooltip">Shifts the whole grid away from the picked point, on top of whatever the anchor already decided. Use it to hold a margin from an edge without moving the point itself. Negative values go the other way.</string>
   <string key="in.info">Result</string>
   <string key="info.result">{0} × {1} = {2} shapes, {3} × {4} mm overall</string>
 

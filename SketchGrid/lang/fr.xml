@@ -37,6 +37,9 @@ Nombre fixe de colonnes et de lignes, ou autant qu'il en tient dans une zone.</s
   <string key="anchor.top_center">En haut au centre</string>
   <string key="anchor.left_center">À gauche au centre</string>
   <string key="anchor.right_center">À droite au centre</string>
+  <string key="in.offset_x">Décalage X</string>
+  <string key="in.offset_y">Décalage Y</string>
+  <string key="offset.tooltip">Déplace toute la grille par rapport au point sélectionné, en plus de ce que le point d'ancrage a déjà fixé. Permet de garder une marge par rapport à un bord sans déplacer le point lui-même. Les valeurs négatives vont dans l'autre sens.</string>
   <string key="in.info">Résultat</string>
   <string key="info.result">{0} × {1} = {2} formes, {3} × {4} mm au total</string>
 

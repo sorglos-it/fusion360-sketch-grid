@@ -37,6 +37,9 @@ Número fijo de columnas y filas, o tantas como quepan en un área.</string>
   <string key="anchor.top_center">Arriba al centro</string>
   <string key="anchor.left_center">A la izquierda al centro</string>
   <string key="anchor.right_center">A la derecha al centro</string>
+  <string key="in.offset_x">Desfase X</string>
+  <string key="in.offset_y">Desfase Y</string>
+  <string key="offset.tooltip">Desplaza toda la rejilla respecto al punto seleccionado, además de lo que ya determina el punto de referencia. Sirve para mantener un margen con un borde sin mover el punto. Los valores negativos van en sentido contrario.</string>
   <string key="in.info">Resultado</string>
   <string key="info.result">{0} × {1} = {2} formas, {3} × {4} mm en total</string>
 

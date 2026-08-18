@@ -49,6 +49,8 @@ IN_ROWS = 'sgRows'
 IN_AREA_WIDTH = 'sgAreaWidth'
 IN_AREA_HEIGHT = 'sgAreaHeight'
 IN_ANCHOR = 'sgAnchor'
+IN_OFFSET_X = 'sgOffsetX'
+IN_OFFSET_Y = 'sgOffsetY'
 IN_INFO = 'sgInfo'
 
 RESOURCE_FOLDER = os.path.join(_DIR, 'resources', 'SketchGrid')
@@ -100,6 +102,8 @@ _last = {
     IN_AREA_WIDTH: 10.0,    # 100 mm
     IN_AREA_HEIGHT: 4.0,    # 40 mm
     IN_ANCHOR: 0,           # centre
+    IN_OFFSET_X: 0.0,
+    IN_OFFSET_Y: 0.0,
 }
 
 # =============================================================================
@@ -127,12 +131,14 @@ def mm(value):
 # ============================================================ YOUR CODE HERE ==
 
 def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
-                area_width, area_height, anchor):
+                area_width, area_height, anchor, offset_x=0.0, offset_y=0.0):
     """Work out the grid without touching Fusion.
 
     Returns (columns, rows, pitch_x, pitch_y, total_width, total_height,
-    offset_x, offset_y), where the offsets place the lower left corner of the
-    bounding box relative to the picked point.
+    origin_x, origin_y), where the origin places the lower left corner of the
+    bounding box relative to the picked point. The anchor decides where the
+    point sits in the grid; offset_x and offset_y then shift the whole thing
+    away from it, which is how you keep a margin without moving the point.
 
     Kept free of adsk calls on purpose: this is the part worth testing, and
     tools/test_sketchgrid.py runs it without starting Fusion.
@@ -169,18 +175,19 @@ def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
 
     factor_x, factor_y = ANCHOR_FACTORS[anchor]
     return (columns, rows, pitch_x, pitch_y, total_width, total_height,
-            -factor_x * total_width, -factor_y * total_height)
+            -factor_x * total_width + offset_x,
+            -factor_y * total_height + offset_y)
 
 
 def cell_centres(layout):
     """Centre of every cell, relative to the picked point, row by row."""
     (columns, rows, pitch_x, pitch_y,
-     _total_width, _total_height, offset_x, offset_y) = layout
+     _total_width, _total_height, origin_x, origin_y) = layout
     out = []
     for row in range(rows):
         for column in range(columns):
-            out.append((offset_x + column * pitch_x,
-                        offset_y + row * pitch_y))
+            out.append((origin_x + column * pitch_x,
+                        origin_y + row * pitch_y))
     return out
 
 
@@ -305,6 +312,8 @@ def read_inputs(inputs):
         rows=inputs.itemById(IN_ROWS).value,
         area_width=inputs.itemById(IN_AREA_WIDTH).value,
         area_height=inputs.itemById(IN_AREA_HEIGHT).value,
+        offset_x=inputs.itemById(IN_OFFSET_X).value,
+        offset_y=inputs.itemById(IN_OFFSET_Y).value,
     )
 
 
@@ -312,7 +321,8 @@ def layout_of(values):
     return grid_layout(values['mode'], values['width'], values['height'],
                        values['gap_x'], values['gap_y'], values['columns'],
                        values['rows'], values['area_width'],
-                       values['area_height'], values['anchor'])
+                       values['area_height'], values['anchor'],
+                       values['offset_x'], values['offset_y'])
 
 
 def validate(values):
@@ -403,6 +413,12 @@ def build_inputs(inputs):
     for index, key in enumerate(ANCHOR_KEYS):
         anchor.listItems.add(T(key), index == _last[IN_ANCHOR])
 
+    offset_x = inputs.addValueInput(IN_OFFSET_X, T('in.offset_x'), 'mm',
+                                    adsk.core.ValueInput.createByReal(_last[IN_OFFSET_X]))
+    offset_y = inputs.addValueInput(IN_OFFSET_Y, T('in.offset_y'), 'mm',
+                                    adsk.core.ValueInput.createByReal(_last[IN_OFFSET_Y]))
+    offset_x.tooltip = offset_y.tooltip = T('offset.tooltip')
+
     inputs.addTextBoxCommandInput(IN_INFO, T('in.info'), '', 1, True)
     return selection
 
@@ -414,7 +430,8 @@ def remember(values):
                       (IN_GAP_X, 'gap_x'), (IN_GAP_Y, 'gap_y'),
                       (IN_COLUMNS, 'columns'), (IN_ROWS, 'rows'),
                       (IN_AREA_WIDTH, 'area_width'),
-                      (IN_AREA_HEIGHT, 'area_height')):
+                      (IN_AREA_HEIGHT, 'area_height'),
+                      (IN_OFFSET_X, 'offset_x'), (IN_OFFSET_Y, 'offset_y')):
         _last[key] = values[name]
 
 

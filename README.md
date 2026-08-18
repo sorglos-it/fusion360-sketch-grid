@@ -19,6 +19,7 @@ See also **[fusion360-dovetail](https://github.com/sorglos-it/fusion360-dovetail
 - **Two counting modes** — fixed columns and rows, or as many as fit into a given area
 - **Four shapes** — rectangle, circle/ellipse, slot with rounded ends, regular polygon from 3 to 24 sides
 - **Nine anchor positions** — the picked point can be the middle of the grid, any corner, or the middle of any edge
+- **Offset X / Y** — shift the grid off the point to hold a margin, without moving the point
 - **Separate gaps** for X and Y, zero allowed for shapes that touch
 - **Live read-out** — *8 × 4 = 32 shapes, 94 × 26 mm overall*, updated as you type
 - **Live preview** — the sketch updates while the dialog is open
@@ -69,6 +70,7 @@ Worked example, the one the add-in was built around: length 10 mm, depth 5 mm, g
 | **Columns** / **Rows** | Fixed mode: the count outright. |
 | **Area width** / **Area height** | Fill mode: the space to fill. |
 | **Point sits** | Where the picked point is in the grid: middle, a corner, or the middle of an edge. |
+| **Offset X** / **Offset Y** | Shifts the whole grid off the point, on top of the anchor. Negative goes the other way. |
 | **Result** | Read-only: how many shapes and how big the grid comes out. |
 
 ## The two modes
@@ -106,6 +108,14 @@ Nine positions, here with a 3 × 2 grid, `X` the picked point and `#` the shapes
 `In the middle` is the default and grows the grid symmetrically in all four directions. For the 8 × 4 example that puts the lower left corner 47 mm left and 13 mm below the point. `Bottom left` puts the point exactly on the lower left corner, so the grid occupies the space up and to the right of it.
 
 `tools/test_sketchgrid.py` derives the expected factors from each entry's own name and checks them both ways round, so a label that disagrees with the geometry fails the suite.
+
+## Offset
+
+The anchor puts the point somewhere in the grid; **Offset X** and **Offset Y** then move the whole grid off it. The two add up rather than replacing each other.
+
+The case it exists for: your point sits at 0/0, but the grid should start 2 mm in from it because you want a margin at that edge. Without the offset you would have to move the point to 2/2 and lose it as a reference. With it, the point stays where it belongs and the grid sits where you want it — and the margin does not have to match the gap, so a safety zone of any size works.
+
+Count, pitch and overall size are untouched by the offset, and in *fill an area* mode it does not change how many shapes fit — it only moves the result.
 
 ## Shapes
 

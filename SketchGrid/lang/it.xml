@@ -37,6 +37,9 @@ Numero fisso di colonne e righe, oppure quante ne stanno in un'area.</string>
   <string key="anchor.top_center">In alto al centro</string>
   <string key="anchor.left_center">A sinistra al centro</string>
   <string key="anchor.right_center">A destra al centro</string>
+  <string key="in.offset_x">Scostamento X</string>
+  <string key="in.offset_y">Scostamento Y</string>
+  <string key="offset.tooltip">Sposta l'intera griglia rispetto al punto selezionato, in aggiunta a quanto stabilito dal punto di riferimento. Serve a mantenere un margine da un bordo senza spostare il punto stesso. I valori negativi vanno nella direzione opposta.</string>
   <string key="in.info">Risultato</string>
   <string key="info.result">{0} × {1} = {2} forme, {3} × {4} mm in totale</string>
 
