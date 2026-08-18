@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+import math
 import types
 import xml.etree.ElementTree as ElementTree
 
@@ -313,19 +314,115 @@ check(tight[0] > plain[0],
 check(tight[4] <= 100 * MM + 1e-12,
       'and the grid still stays inside the area (%.2f mm)' % (tight[4] * 10))
 
-print('9) Every drop-down entry has a text of its own')
+print('9) Rectangle corners')
+# corner_cut() turns the dialog value into the cut that is actually used. It
+# refuses what does not fit rather than trimming it behind your back.
+check(sg.corner_cut(sg.SHAPE_RECTANGLE, sg.CORNER_SHARP, 1 * MM,
+                    10 * MM, 5 * MM) == 0.0,
+      'sharp corners cut nothing')
+check(sg.corner_cut(sg.SHAPE_SLOT, sg.CORNER_ROUND, 1 * MM,
+                    10 * MM, 5 * MM) == 0.0,
+      'the corner setting is ignored for every other shape')
+check(abs(sg.corner_cut(sg.SHAPE_RECTANGLE, sg.CORNER_ROUND, 1 * MM,
+                        10 * MM, 5 * MM) - 1 * MM) < 1e-12,
+      'a 1 mm radius on a 10 x 5 rectangle comes back as 1 mm')
+check(abs(sg.corner_cut(sg.SHAPE_RECTANGLE, sg.CORNER_CHAMFER, 2.5 * MM,
+                        10 * MM, 5 * MM) - 2.5 * MM) < 1e-12,
+      'half the shorter edge is the limit and still allowed')
+
+
+def expect_cut_error(key, label, corner=sg.CORNER_ROUND, size=1 * MM,
+                     width=10 * MM, height=5 * MM):
+    try:
+        sg.corner_cut(sg.SHAPE_RECTANGLE, corner, size, width, height)
+        check(False, '%s -> should have raised "%s"' % (label, key))
+    except sg.core.AddInError as err:
+        check(err.key == key, '%s -> %s  "%s"' % (label, err.key, err))
+
+
+expect_cut_error('err.corner_size', 'a radius of 0', size=0.0)
+expect_cut_error('err.corner_too_big', 'a radius past half the shorter edge',
+                 size=2.6 * MM)
+expect_cut_error('err.corner_too_big', 'a chamfer past half the shorter edge',
+                 corner=sg.CORNER_CHAMFER, size=3 * MM)
+
+
+def circumcircle(a, b, c):
+    """Centre and radius through three points - what Fusion builds the arc from."""
+    d = 2.0 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]))
+    sq_a, sq_b, sq_c = (a[0] ** 2 + a[1] ** 2, b[0] ** 2 + b[1] ** 2,
+                        c[0] ** 2 + c[1] ** 2)
+    x = (sq_a * (b[1] - c[1]) + sq_b * (c[1] - a[1]) + sq_c * (a[1] - b[1])) / d
+    y = (sq_a * (c[0] - b[0]) + sq_b * (a[0] - c[0]) + sq_c * (b[0] - a[0])) / d
+    return (x, y), math.hypot(a[0] - x, a[1] - y)
+
+
+def check_outline(label, width, height, cut, rounded, segments):
+    out = sg.corner_outline(width, height, cut, rounded)
+    check(len(out) == segments,
+          '%s: %d segments (%d)' % (label, segments, len(out)))
+
+    # Every segment ends where the next one starts, the last one back at the
+    # first - without that Fusion finds no closed profile.
+    gaps = [i for i, seg in enumerate(out)
+            if abs(seg[-1][0] - out[(i + 1) % len(out)][1][0]) > 1e-12
+            or abs(seg[-1][1] - out[(i + 1) % len(out)][1][1]) > 1e-12]
+    check(not gaps, '%s: the outline closes%s'
+          % (label, '' if not gaps else ' - open after segment %s' % gaps))
+
+    stubs = [i for i, seg in enumerate(out)
+             if math.hypot(seg[-1][0] - seg[1][0], seg[-1][1] - seg[1][1]) < 1e-12]
+    check(not stubs, '%s: no segment of zero length%s'
+          % (label, '' if not stubs else ' - %s' % stubs))
+
+    points = [point for seg in out for point in seg[1:]]
+    span_x = max(p[0] for p in points) - min(p[0] for p in points)
+    span_y = max(p[1] for p in points) - min(p[1] for p in points)
+    check(abs(span_x - width) < 1e-12 and abs(span_y - height) < 1e-12,
+          '%s: still fills the cell, %.2f x %.2f mm'
+          % (label, span_x * 10, span_y * 10))
+
+    radii = [circumcircle(seg[1], seg[2], seg[3])[1]
+             for seg in out if seg[0] == 'arc']
+    check(all(abs(r - cut) < 1e-9 for r in radii),
+          '%s: every arc has the radius asked for (%s)'
+          % (label, ', '.join('%.3f' % (r * 10) for r in radii) or 'none'))
+
+
+check_outline('rounded 10 x 5, r 1', 10 * MM, 5 * MM, 1 * MM, True, 8)
+check_outline('chamfered 10 x 5, 1 mm', 10 * MM, 5 * MM, 1 * MM, False, 8)
+# At half the shorter edge the straight piece on that side disappears: the
+# rounded one becomes a slot, the chamfered one loses its short edges too.
+check_outline('rounded 10 x 5, r 2.5 - a slot', 10 * MM, 5 * MM, 2.5 * MM, True, 6)
+check_outline('chamfered 10 x 5, 2.5 mm', 10 * MM, 5 * MM, 2.5 * MM, False, 6)
+check_outline('chamfered 10 x 10, 5 mm - a diamond', 10 * MM, 10 * MM, 5 * MM,
+              False, 4)
+# The rounded square at half of both edges is a circle, which _draw_cut_rectangle
+# handles itself rather than asking for an outline.
+check(abs(sg.corner_cut(sg.SHAPE_RECTANGLE, sg.CORNER_ROUND, 5 * MM,
+                        10 * MM, 10 * MM) - 5 * MM) < 1e-12,
+      'a radius of half a square is allowed - that is the circle')
+
+# The corners never reach outside the cell, so the layout does not know about
+# them and does not have to.
+plain = layout(shape=sg.SHAPE_RECTANGLE)
+check(abs(plain[8] - 10 * MM) < 1e-12 and abs(plain[9] - 5 * MM) < 1e-12,
+      'the layout still measures the full 10.00 x 5.00 mm cell')
+
+print('10) Every drop-down entry has a text of its own')
 for key in ('in.offset_x', 'in.offset_y', 'offset.tooltip',
-            'in.regular', 'regular.tooltip'):
+            'in.regular', 'regular.tooltip',
+            'in.corner', 'in.corner_size', 'corner.tooltip'):
     check(key in reference, '%s present' % key)
 for label, keys in (('mode', sg.MODE_KEYS), ('shape', sg.SHAPE_KEYS),
-                    ('anchor', sg.ANCHOR_KEYS)):
+                    ('corner', sg.CORNER_KEYS), ('anchor', sg.ANCHOR_KEYS)):
     missing = [key for key in keys if key not in reference]
     check(not missing, '%s: all %d entries present%s'
           % (label, len(keys), '' if not missing else ' - missing %s' % missing))
 check(len(sg.ANCHOR_KEYS) == len(sg.ANCHOR_FACTORS),
       'every anchor entry has a factor pair')
 
-print('10) Text catalogue')
+print('11) Text catalogue')
 for code in sg.core.SUPPORTED_LANGUAGES:
     sg.S.load(code)
     check(sg.S.code == code and sg.T('cmd.name') != 'cmd.name',

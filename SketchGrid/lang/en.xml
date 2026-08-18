@@ -26,6 +26,12 @@ Fixed number of columns and rows, or as many as fit into an area.</string>
   <string key="in.sides">Sides</string>
   <string key="in.regular">Regular</string>
   <string key="regular.tooltip">Keeps the polygon equilateral instead of stretching it to length x depth. The smaller of the two then sets its size, and the pitch follows the actual shape - so the gap you set is the gap you get either way.</string>
+  <string key="in.corner">Corners</string>
+  <string key="corner.sharp">Sharp</string>
+  <string key="corner.round">Rounded</string>
+  <string key="corner.chamfer">Chamfered</string>
+  <string key="in.corner_size">Radius / chamfer</string>
+  <string key="corner.tooltip">Takes the four right-angled corners off the rectangle, either as a fillet arc or as a straight chamfer. At most half of the shorter edge - a radius of exactly that turns the rectangle into a slot, a chamfer of it into a diamond. The bounding box is unchanged, so the count, the pitch and the gap stay as they are.</string>
   <string key="in.width">Length (X)</string>
   <string key="in.height">Depth (Y)</string>
   <string key="in.gap_x">Gap X</string>
@@ -60,6 +66,8 @@ Fixed number of columns and rows, or as many as fit into an area.</string>
   <string key="err.area_positive">The area must be greater than 0 in both directions.</string>
   <string key="err.area_too_small">Not even one shape fits into that area. It needs at least {0} × {1} mm.</string>
   <string key="err.sides">A polygon needs between {0} and {1} sides.</string>
+  <string key="err.corner_size">The radius / chamfer must be greater than 0.</string>
+  <string key="err.corner_too_big">The radius / chamfer can be at most {0} mm, half of the shorter edge.</string>
   <string key="err.too_many">That would be {0} shapes. At most {1} are allowed - more would lock Fusion up.</string>
 
   <!-- Message boxes -->

@@ -41,6 +41,8 @@ IN_MODE = 'sgMode'
 IN_SHAPE = 'sgShape'
 IN_SIDES = 'sgSides'
 IN_REGULAR = 'sgRegular'
+IN_CORNER = 'sgCorner'
+IN_CORNER_SIZE = 'sgCornerSize'
 IN_WIDTH = 'sgWidth'
 IN_HEIGHT = 'sgHeight'
 IN_GAP_X = 'sgGapX'
@@ -69,6 +71,13 @@ SHAPE_SLOT = 2
 SHAPE_POLYGON = 3
 SHAPE_KEYS = ('shape.rectangle', 'shape.ellipse', 'shape.slot', 'shape.polygon')
 
+# What becomes of the four 90 degree corners of a rectangle. As with the mode
+# and the shape, the stored value is the index in the drop-down.
+CORNER_SHARP = 0
+CORNER_ROUND = 1
+CORNER_CHAMFER = 2
+CORNER_KEYS = ('corner.sharp', 'corner.round', 'corner.chamfer')
+
 # Where the picked point sits inside the grid, as a fraction of the bounding
 # box: (0, 0) is the lower left corner, (0.5, 0.5) the middle.
 ANCHOR_KEYS = ('anchor.center',
@@ -95,6 +104,8 @@ _last = {
     IN_SHAPE: SHAPE_RECTANGLE,
     IN_SIDES: 6,
     IN_REGULAR: False,
+    IN_CORNER: CORNER_SHARP,
+    IN_CORNER_SIZE: 0.1,    # 1 mm
     IN_WIDTH: 1.0,          # 10 mm
     IN_HEIGHT: 0.5,         # 5 mm
     IN_GAP_X: 0.2,          # 2 mm
@@ -168,6 +179,68 @@ def shape_extent(shape, width, height, sides, regular):
     return (width, height)
 
 
+def corner_cut(shape, corner, size, width, height):
+    """The radius, resp. the chamfer, actually applied to a rectangle's corners.
+
+    Returns 0 for every other shape and for sharp corners, so the drawing code
+    has one question to ask instead of three. Half the shorter edge is the
+    limit: at exactly that the two cuts on that edge meet, and beyond it they
+    would run past each other. More than that is refused rather than quietly
+    trimmed - only rounding noise is absorbed.
+
+    The cut changes nothing about the layout. The bounding box is still length
+    x depth, so the pitch, the count and the gap stay as they were.
+    """
+    if shape != SHAPE_RECTANGLE or corner == CORNER_SHARP:
+        return 0.0
+    if size <= EPS:
+        fail('err.corner_size')
+    limit = min(width, height) / 2.0
+    if size > limit + EPS:
+        fail('err.corner_too_big', '%.2f' % mm(limit))
+    return min(size, limit)
+
+
+def corner_outline(width, height, cut, rounded):
+    """The outline of a rectangle with its corners taken off, as segments.
+
+    Each entry is ('line', start, end) or ('arc', start, through, end), the
+    points relative to the centre of the shape and running counter-clockwise,
+    so the end of one segment is the start of the next and the last closes back
+    onto the first. No adsk calls, which is what lets tools/test_sketchgrid.py
+    check the geometry - _draw_cut_rectangle only hands the result to Fusion.
+
+    A cut of half an edge leaves no straight piece on that side, and such an
+    edge is left out rather than emitted with zero length. Rounded on half of
+    both edges is a circle and has no outline of this kind at all; that case
+    belongs to the caller.
+    """
+    half_w, half_h = width / 2.0, height / 2.0
+    inner_x, inner_y = half_w - cut, half_h - cut
+    # The arc's third point sits on the diagonal out of the corner's centre.
+    diagonal = cut * math.sqrt(0.5)
+
+    # Each edge counter-clockwise from the bottom one, then the sign pair that
+    # picks the corner ending it out of the four centres (+-inner_x, +-inner_y),
+    # then where that corner comes out again.
+    edges = (((-inner_x, -half_h), (inner_x, -half_h), (1.0, -1.0), (half_w, -inner_y)),
+             ((half_w, -inner_y), (half_w, inner_y), (1.0, 1.0), (inner_x, half_h)),
+             ((inner_x, half_h), (-inner_x, half_h), (-1.0, 1.0), (-half_w, inner_y)),
+             ((-half_w, inner_y), (-half_w, -inner_y), (-1.0, -1.0), (-inner_x, -half_h)))
+
+    out = []
+    for start, end, (sign_x, sign_y), corner_end in edges:
+        if abs(end[0] - start[0]) > EPS or abs(end[1] - start[1]) > EPS:
+            out.append(('line', start, end))
+        if rounded:
+            out.append(('arc', end,
+                        (sign_x * (inner_x + diagonal), sign_y * (inner_y + diagonal)),
+                        corner_end))
+        else:
+            out.append(('line', end, corner_end))
+    return out
+
+
 def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
                 area_width, area_height, anchor, offset_x=0.0, offset_y=0.0,
                 shape=SHAPE_RECTANGLE, sides=6, regular=False):
@@ -237,10 +310,37 @@ def _point(sketch_x, sketch_y):
     return adsk.core.Point3D.create(sketch_x, sketch_y, 0.0)
 
 
-def _draw_rectangle(sketch, cx, cy, width, height):
-    sketch.sketchCurves.sketchLines.addTwoPointRectangle(
-        _point(cx - width / 2.0, cy - height / 2.0),
-        _point(cx + width / 2.0, cy + height / 2.0))
+def _draw_rectangle(sketch, cx, cy, width, height,
+                    corner=CORNER_SHARP, cut=0.0):
+    if corner == CORNER_SHARP or cut <= EPS:
+        sketch.sketchCurves.sketchLines.addTwoPointRectangle(
+            _point(cx - width / 2.0, cy - height / 2.0),
+            _point(cx + width / 2.0, cy + height / 2.0))
+        return
+    _draw_cut_rectangle(sketch, cx, cy, width, height, cut,
+                        corner == CORNER_ROUND)
+
+
+def _draw_cut_rectangle(sketch, cx, cy, width, height, cut, rounded):
+    """Rectangle with all four corners taken off, as an arc or as a chamfer.
+
+    `cut` is the fillet radius, resp. the leg length of the chamfer, and has
+    already been measured against half the shorter edge by corner_cut().
+    """
+    # Rounded on half of both edges leaves nothing but the circle itself, and
+    # a circle is not a chain of segments.
+    if rounded and width - 2.0 * cut <= EPS and height - 2.0 * cut <= EPS:
+        sketch.sketchCurves.sketchCircles.addByCenterRadius(_point(cx, cy), cut)
+        return
+
+    lines = sketch.sketchCurves.sketchLines
+    arcs = sketch.sketchCurves.sketchArcs
+    for segment in corner_outline(width, height, cut, rounded):
+        points = [_point(cx + dx, cy + dy) for dx, dy in segment[1:]]
+        if segment[0] == 'arc':
+            arcs.addByThreePoints(*points)
+        else:
+            lines.addByTwoPoints(*points)
 
 
 def _draw_ellipse(sketch, cx, cy, width, height):
@@ -322,7 +422,8 @@ def _draw_polygon(sketch, cx, cy, width, height, sides, regular):
     lines.addByTwoPoints(previous.endSketchPoint, first.startSketchPoint)
 
 
-def _draw_shape(sketch, shape, cx, cy, width, height, sides, regular):
+def _draw_shape(sketch, shape, cx, cy, width, height, sides, regular,
+                corner=CORNER_SHARP, cut=0.0):
     if shape == SHAPE_ELLIPSE:
         _draw_ellipse(sketch, cx, cy, width, height)
     elif shape == SHAPE_SLOT:
@@ -330,7 +431,7 @@ def _draw_shape(sketch, shape, cx, cy, width, height, sides, regular):
     elif shape == SHAPE_POLYGON:
         _draw_polygon(sketch, cx, cy, width, height, sides, regular)
     else:
-        _draw_rectangle(sketch, cx, cy, width, height)
+        _draw_rectangle(sketch, cx, cy, width, height, corner, cut)
 
 
 def read_inputs(inputs):
@@ -344,6 +445,7 @@ def read_inputs(inputs):
     mode_item = inputs.itemById(IN_MODE).selectedItem
     shape_item = inputs.itemById(IN_SHAPE).selectedItem
     anchor_item = inputs.itemById(IN_ANCHOR).selectedItem
+    corner_item = inputs.itemById(IN_CORNER).selectedItem
     return dict(
         point=point,
         mode=mode_item.index if mode_item else MODE_COUNT,
@@ -351,6 +453,8 @@ def read_inputs(inputs):
         anchor=anchor_item.index if anchor_item else 0,
         sides=inputs.itemById(IN_SIDES).value,
         regular=inputs.itemById(IN_REGULAR).value,
+        corner=corner_item.index if corner_item else CORNER_SHARP,
+        corner_size=inputs.itemById(IN_CORNER_SIZE).value,
         width=inputs.itemById(IN_WIDTH).value,
         height=inputs.itemById(IN_HEIGHT).value,
         gap_x=inputs.itemById(IN_GAP_X).value,
@@ -362,6 +466,11 @@ def read_inputs(inputs):
         offset_x=inputs.itemById(IN_OFFSET_X).value,
         offset_y=inputs.itemById(IN_OFFSET_Y).value,
     )
+
+
+def cut_of(values):
+    return corner_cut(values['shape'], values['corner'], values['corner_size'],
+                      values['width'], values['height'])
 
 
 def layout_of(values):
@@ -380,6 +489,7 @@ def validate(values):
             MIN_SIDES <= values['sides'] <= MAX_SIDES):
         fail('err.sides', str(MIN_SIDES), str(MAX_SIDES))
     layout_of(values)
+    cut_of(values)
 
 
 def build_result(values):
@@ -387,6 +497,7 @@ def build_result(values):
     sketch = point.parentSketch
     origin = point.geometry
     layout = layout_of(values)
+    cut = cut_of(values)
     # Centre each shape in its own footprint, which is the cell for everything
     # except a regular polygon.
     half_w, half_h = layout[8] / 2.0, layout[9] / 2.0
@@ -400,7 +511,7 @@ def build_result(values):
             _draw_shape(sketch, values['shape'],
                         origin.x + dx + half_w, origin.y + dy + half_h,
                         values['width'], values['height'], values['sides'],
-                        values['regular'])
+                        values['regular'], values['corner'], cut)
     finally:
         sketch.isComputeDeferred = False
 
@@ -409,6 +520,7 @@ def describe(values):
     """One line for the info box: how many, and how big the whole grid is."""
     try:
         layout = layout_of(values)
+        cut_of(values)
     except core.AddInError as err:
         return str(err)
     columns, rows = layout[0], layout[1]
@@ -439,6 +551,20 @@ def build_inputs(inputs):
                                        _last[IN_REGULAR])
     regular.tooltip = T('regular.tooltip')
     regular.isVisible = _last[IN_SHAPE] == SHAPE_POLYGON
+
+    corner = inputs.addDropDownCommandInput(
+        IN_CORNER, T('in.corner'), adsk.core.DropDownStyles.TextListDropDownStyle)
+    for index, key in enumerate(CORNER_KEYS):
+        corner.listItems.add(T(key), index == _last[IN_CORNER])
+    corner.tooltip = T('corner.tooltip')
+    corner.isVisible = _last[IN_SHAPE] == SHAPE_RECTANGLE
+
+    corner_size = inputs.addValueInput(
+        IN_CORNER_SIZE, T('in.corner_size'), 'mm',
+        adsk.core.ValueInput.createByReal(_last[IN_CORNER_SIZE]))
+    corner_size.tooltip = T('corner.tooltip')
+    corner_size.isVisible = (_last[IN_SHAPE] == SHAPE_RECTANGLE
+                             and _last[IN_CORNER] != CORNER_SHARP)
 
     inputs.addValueInput(IN_WIDTH, T('in.width'), 'mm',
                          adsk.core.ValueInput.createByReal(_last[IN_WIDTH]))
@@ -483,6 +609,7 @@ def remember(values):
     for key, name in ((IN_MODE, 'mode'), (IN_SHAPE, 'shape'),
                       (IN_ANCHOR, 'anchor'), (IN_SIDES, 'sides'),
                       (IN_REGULAR, 'regular'),
+                      (IN_CORNER, 'corner'), (IN_CORNER_SIZE, 'corner_size'),
                       (IN_WIDTH, 'width'), (IN_HEIGHT, 'height'),
                       (IN_GAP_X, 'gap_x'), (IN_GAP_Y, 'gap_y'),
                       (IN_COLUMNS, 'columns'), (IN_ROWS, 'rows'),
@@ -506,6 +633,10 @@ def refresh(inputs):
     is_polygon = values['shape'] == SHAPE_POLYGON
     inputs.itemById(IN_SIDES).isVisible = is_polygon
     inputs.itemById(IN_REGULAR).isVisible = is_polygon
+    is_rectangle = values['shape'] == SHAPE_RECTANGLE
+    inputs.itemById(IN_CORNER).isVisible = is_rectangle
+    inputs.itemById(IN_CORNER_SIZE).isVisible = (
+        is_rectangle and values['corner'] != CORNER_SHARP)
 
     _updating = True
     try:

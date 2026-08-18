@@ -21,6 +21,12 @@ Número fijo de columnas y filas, o tantas como quepan en un área.</string>
   <string key="in.sides">Lados</string>
   <string key="in.regular">Regular</string>
   <string key="regular.tooltip">Mantiene el polígono equilátero en lugar de estirarlo a longitud × profundidad. La menor de las dos fija su tamaño y el paso sigue la forma real: la separación indicada se respeta en ambos casos.</string>
+  <string key="in.corner">Esquinas</string>
+  <string key="corner.sharp">Vivas</string>
+  <string key="corner.round">Redondeadas</string>
+  <string key="corner.chamfer">Achaflanadas</string>
+  <string key="in.corner_size">Radio / chaflán</string>
+  <string key="corner.tooltip">Elimina las cuatro esquinas en ángulo recto del rectángulo, como un redondeo o como un chaflán recto. Como máximo la mitad del lado más corto: ese radio exacto convierte el rectángulo en una ranura, y ese chaflán en un rombo. El rectángulo envolvente no cambia, así que la cantidad, el paso y la separación se mantienen.</string>
   <string key="in.width">Longitud (X)</string>
   <string key="in.height">Profundidad (Y)</string>
   <string key="in.gap_x">Separación X</string>
@@ -55,6 +61,8 @@ Número fijo de columnas y filas, o tantas como quepan en un área.</string>
   <string key="err.area_positive">El área debe ser mayor que 0 en ambas direcciones.</string>
   <string key="err.area_too_small">En esa área no cabe ni una sola forma. Se necesitan al menos {0} × {1} mm.</string>
   <string key="err.sides">Un polígono necesita entre {0} y {1} lados.</string>
+  <string key="err.corner_size">El radio / chaflán debe ser mayor que 0.</string>
+  <string key="err.corner_too_big">El radio / chaflán puede ser como máximo de {0} mm, la mitad del lado más corto.</string>
   <string key="err.too_many">Serían {0} formas. Como máximo se permiten {1} - más bloquearía Fusion.</string>
 
   <!-- Message boxes -->

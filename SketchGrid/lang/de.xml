@@ -21,6 +21,12 @@ Feste Anzahl Spalten und Zeilen, oder so viele wie in eine Fläche passen.</stri
   <string key="in.sides">Ecken</string>
   <string key="in.regular">Regelmäßig</string>
   <string key="regular.tooltip">Hält das Vieleck gleichseitig, statt es auf Länge × Tiefe zu strecken. Die kleinere der beiden bestimmt dann die Größe, und die Teilung folgt der tatsächlichen Form - der Abstand stimmt so oder so.</string>
+  <string key="in.corner">Eckenform</string>
+  <string key="corner.sharp">Scharfkantig</string>
+  <string key="corner.round">Verrundet</string>
+  <string key="corner.chamfer">Gefast</string>
+  <string key="in.corner_size">Radius / Fase</string>
+  <string key="corner.tooltip">Nimmt die vier rechten Winkel des Rechtecks weg, entweder als Rundung oder als gerade Fase. Höchstens die Hälfte der kürzeren Kante - genau dieser Radius macht aus dem Rechteck ein Langloch, diese Fase eine Raute. Die Hüllkontur ändert sich nicht, Anzahl, Teilung und Abstand bleiben also, wie sie sind.</string>
   <string key="in.width">Länge (X)</string>
   <string key="in.height">Tiefe (Y)</string>
   <string key="in.gap_x">Abstand X</string>
@@ -55,6 +61,8 @@ Feste Anzahl Spalten und Zeilen, oder so viele wie in eine Fläche passen.</stri
   <string key="err.area_positive">Die Fläche muss in beiden Richtungen größer als 0 sein.</string>
   <string key="err.area_too_small">In diese Fläche passt nicht einmal eine Form. Nötig sind mindestens {0} × {1} mm.</string>
   <string key="err.sides">Ein Vieleck braucht zwischen {0} und {1} Ecken.</string>
+  <string key="err.corner_size">Radius bzw. Fase muss größer als 0 sein.</string>
+  <string key="err.corner_too_big">Radius bzw. Fase darf höchstens {0} mm betragen, die Hälfte der kürzeren Kante.</string>
   <string key="err.too_many">Das wären {0} Formen. Erlaubt sind höchstens {1} - mehr legt Fusion lahm.</string>
 
   <!-- Message boxes -->

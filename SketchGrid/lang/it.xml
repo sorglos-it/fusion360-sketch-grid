@@ -21,6 +21,12 @@ Numero fisso di colonne e righe, oppure quante ne stanno in un'area.</string>
   <string key="in.sides">Lati</string>
   <string key="in.regular">Regolare</string>
   <string key="regular.tooltip">Mantiene il poligono equilatero invece di allungarlo a lunghezza × profondità. La minore delle due ne determina la dimensione e il passo segue la forma reale - la distanza impostata viene rispettata in entrambi i casi.</string>
+  <string key="in.corner">Spigoli</string>
+  <string key="corner.sharp">Vivi</string>
+  <string key="corner.round">Raccordati</string>
+  <string key="corner.chamfer">Smussati</string>
+  <string key="in.corner_size">Raggio / smusso</string>
+  <string key="corner.tooltip">Elimina i quattro angoli retti del rettangolo, come raccordo o come smusso diritto. Al massimo metà del lato più corto: proprio quel raggio trasforma il rettangolo in un'asola, quello smusso in un rombo. L'ingombro non cambia, quindi numero, passo e distanza restano quelli di prima.</string>
   <string key="in.width">Lunghezza (X)</string>
   <string key="in.height">Profondità (Y)</string>
   <string key="in.gap_x">Distanza X</string>
@@ -55,6 +61,8 @@ Numero fisso di colonne e righe, oppure quante ne stanno in un'area.</string>
   <string key="err.area_positive">L'area deve essere maggiore di 0 in entrambe le direzioni.</string>
   <string key="err.area_too_small">In quest'area non entra nemmeno una forma. Servono almeno {0} × {1} mm.</string>
   <string key="err.sides">Un poligono richiede da {0} a {1} lati.</string>
+  <string key="err.corner_size">Il raggio / smusso deve essere maggiore di 0.</string>
+  <string key="err.corner_too_big">Il raggio / smusso può essere al massimo di {0} mm, metà del lato più corto.</string>
   <string key="err.too_many">Sarebbero {0} forme. Ne sono consentite al massimo {1} - oltre, Fusion si blocca.</string>
 
   <!-- Message boxes -->

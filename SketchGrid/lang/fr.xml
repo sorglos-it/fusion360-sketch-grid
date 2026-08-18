@@ -21,6 +21,12 @@ Nombre fixe de colonnes et de lignes, ou autant qu'il en tient dans une zone.</s
   <string key="in.sides">Côtés</string>
   <string key="in.regular">Régulier</string>
   <string key="regular.tooltip">Garde le polygone équilatéral au lieu de l'étirer à la longueur × la profondeur. La plus petite des deux fixe alors sa taille et le pas suit la forme réelle - l'écart demandé est respecté dans les deux cas.</string>
+  <string key="in.corner">Coins</string>
+  <string key="corner.sharp">Vifs</string>
+  <string key="corner.round">Arrondis</string>
+  <string key="corner.chamfer">Chanfreinés</string>
+  <string key="in.corner_size">Rayon / chanfrein</string>
+  <string key="corner.tooltip">Enlève les quatre angles droits du rectangle, sous forme d'un congé ou d'un chanfrein droit. Au plus la moitié du côté le plus court : ce rayon exact transforme le rectangle en trou oblong, ce chanfrein en losange. Le rectangle englobant ne change pas, le nombre, le pas et l'écart restent donc les mêmes.</string>
   <string key="in.width">Longueur (X)</string>
   <string key="in.height">Profondeur (Y)</string>
   <string key="in.gap_x">Écart X</string>
@@ -55,6 +61,8 @@ Nombre fixe de colonnes et de lignes, ou autant qu'il en tient dans une zone.</s
   <string key="err.area_positive">La zone doit être supérieure à 0 dans les deux directions.</string>
   <string key="err.area_too_small">Pas même une forme ne tient dans cette zone. Il faut au moins {0} × {1} mm.</string>
   <string key="err.sides">Un polygone a besoin de {0} à {1} côtés.</string>
+  <string key="err.corner_size">Le rayon / chanfrein doit être supérieur à 0.</string>
+  <string key="err.corner_too_big">Le rayon / chanfrein peut valoir au plus {0} mm, la moitié du côté le plus court.</string>
   <string key="err.too_many">Cela ferait {0} formes. Au maximum {1} sont autorisées - au-delà, Fusion se bloque.</string>
 
   <!-- Message boxes -->

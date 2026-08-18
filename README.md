@@ -17,7 +17,8 @@ See also **[fusion360-dovetail](https://github.com/sorglos-it/fusion360-dovetail
 ## Features
 
 - **Two counting modes** — fixed columns and rows, or as many as fit into a given area
-- **Four shapes** — rectangle, circle/ellipse, slot with rounded ends, regular polygon from 3 to 24 sides
+- **Four shapes** — rectangle, circle/ellipse, slot with rounded ends, polygon from 3 to 24 sides, stretched to the cell or kept equilateral
+- **Rounded or chamfered corners** — the rectangle’s four right angles as a fillet or a straight chamfer, up to half the shorter edge
 - **Nine anchor positions** — the picked point can be the middle of the grid, any corner, or the middle of any edge
 - **Offset X / Y** — shift the grid off the point to hold a margin, without moving the point
 - **Separate gaps** for X and Y, zero allowed for shapes that touch — and the gap is measured between the shapes themselves, whatever their form
@@ -66,6 +67,8 @@ Worked example, the one the add-in was built around: length 10 mm, depth 5 mm, g
 | **Shape** | `Rectangle`, `Circle / ellipse`, `Slot`, `Polygon`. |
 | **Sides** | Polygon only: 3 to 24. |
 | **Regular** | Polygon only. Off: stretched to fill the cell. On: equilateral, sized by the smaller cell edge, and the pitch follows the shape. |
+| **Corners** | Rectangle only: `Sharp`, `Rounded` or `Chamfered`. |
+| **Radius / chamfer** | Rectangle only, and only once the corners are not sharp: the fillet radius, resp. the leg length of the chamfer. |
 | **Length (X)** / **Depth (Y)** | The size of one cell. |
 | **Gap X** / **Gap Y** | Space between neighbours. 0 makes them touch. |
 | **Columns** / **Rows** | Fixed mode: the count outright. |
@@ -91,19 +94,26 @@ The field is called **Point sits in the grid**, and that is exactly what it says
 Nine positions, here with a 3 × 2 grid, `X` the picked point and `#` the shapes:
 
 ```
-  Bottom left          Left centre          Top right
-  #####.#####.#####    #####.#####.#####    #####.#####.####X
+  In the middle        Bottom left          Bottom right
   #####.#####.#####    #####.#####.#####    #####.#####.#####
-  .................    X................    .................
   #####.#####.#####    #####.#####.#####    #####.#####.#####
-  X####.#####.#####    #####.#####.#####    #####.#####.#####
+  ........X........    .................    .................
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  #####.#####.#####    X####.#####.#####    #####.#####.####X
 
-  Bottom centre        In the middle        Right centre
+  Top left             Top right            Bottom centre
+  X####.#####.#####    #####.#####.####X    #####.#####.#####
   #####.#####.#####    #####.#####.#####    #####.#####.#####
+  .................    .................    .................
   #####.#####.#####    #####.#####.#####    #####.#####.#####
-  .................    ........X........    ................X
-  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  #####.#####.#####    #####.#####.#####    #####.##X##.#####
+
+  Top centre           Left centre          Right centre
   #####.##X##.#####    #####.#####.#####    #####.#####.#####
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  .................    X................    ................X
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
+  #####.#####.#####    #####.#####.#####    #####.#####.#####
 ```
 
 `In the middle` is the default and grows the grid symmetrically in all four directions. For the 8 × 4 example that puts the lower left corner 47 mm left and 13 mm below the point. `Bottom left` puts the point exactly on the lower left corner, so the grid occupies the space up and to the right of it.
@@ -122,10 +132,26 @@ Count, pitch and overall size are untouched by the offset, and in *fill an area*
 
 | Shape | Built from | Note |
 |---|---|---|
-| **Rectangle** | Length × depth | The plain case. |
+| **Rectangle** | Length × depth | The plain case. Its four right angles can be rounded or chamfered — see [Corners](#corners). |
 | **Circle / ellipse** | Length and depth as the two axes | Equal values give a true circle, unequal an ellipse with the major axis on the longer side. |
 | **Slot** | Rectangle with semicircular ends | Rounded on the shorter axis; the radius is half of it. Equal length and depth make a circle. |
 | **Polygon** | Length × depth, first vertex pointing up | Stretched to fill the cell, so its bounding box is exactly length × depth for any corner count. Tick **Regular** to keep it equilateral instead — then the smaller cell edge sets its size. |
+
+## Corners
+
+A rectangle can have its four right angles taken off, either as a fillet arc or as a straight chamfer. **Corners** picks which, **Radius / chamfer** says how much. Both fields appear for the rectangle only — the ellipse has no corners, and the slot is round already.
+
+The limit is **half the shorter edge**, and that end of the range is worth knowing, because it turns the rectangle into something else entirely:
+
+| Radius / chamfer | Rounded | Chamfered |
+|---|---|---|
+| 1 mm on a 10 × 5 rectangle | soft corners | the corners cut off |
+| 2.5 mm on a 10 × 5 rectangle — the maximum | a slot | a hexagon; the short edges are gone |
+| 5 mm on a 10 × 10 square — the maximum | a circle | a diamond |
+
+Asking for more than the limit is refused, with the value that would still fit in the message. A 3 mm radius on a 5 mm edge is a typo more often than a wish, and the two cuts on that edge would have to run past each other.
+
+**The bounding box does not change.** A rounded rectangle still measures exactly length × depth, so the count, the pitch and the overall size come out the same as with sharp corners — switching them on does not move a single shape. What changes is what sits diagonally across a corner: the gap you set is still the gap along the flat edges, and around the corners there is now more of it. That is the same reading of *gap* the ellipse already gets.
 
 ## The gap is measured between the shapes
 
@@ -147,12 +173,13 @@ The footprint is measured, not assumed: with the first vertex at 90°, a square 
 1. The picked point gives an origin in sketch space. Everything is computed relative to it and only converted at the moment of drawing, so the grid does not care where in the sketch you are.
 2. `grid_layout()` works out the count, the pitch, the overall size and the offset of the bounding box from the anchor factors. It touches no Fusion API at all, which is why `tools/test_sketchgrid.py` can check it without starting Fusion.
 3. `cell_centres()` walks the cells row by row and yields their positions relative to the point.
-4. Each shape is drawn into the sketch by its own small function. The polygon chains its segments through `endSketchPoint` so the outline comes out connected; the slot relies on coincident endpoints, which is enough for Fusion to detect a profile.
+4. Each shape is drawn into the sketch by its own small function. The polygon chains its segments through `endSketchPoint` so the outline comes out connected; the slot relies on coincident endpoints, which is enough for Fusion to detect a profile. A rectangle with cut corners goes through `corner_outline()`, which returns its lines and arcs as plain numbers and touches no Fusion API either — so the closed contour, the arc radii and the degenerate cases are checked by the test suite like everything else.
 5. Drawing runs with `isComputeDeferred` set. With a few hundred cells that is the difference between instant and unusable.
 
 ## Notes & caveats
 
 - **The count is capped at 2000.** Fill mode with a small shape and a large area produces four-figure counts easily, and Fusion takes minutes over that with the sketch solver awake. The cap refuses with a message rather than appearing to hang.
+- **Only the rectangle has corners to take off.** A polygon keeps its own, sharp. The two fields are hidden for every other shape rather than ignored.
 - **A polygon uses the smaller dimension.** In a wide, flat cell it looks lost, and that is honest: a regular polygon has one diameter. Use a rectangle or an ellipse when the cell is not roughly square.
 - **The polygon's orientation is fixed** with a vertex pointing up. For flat-top hexagons, swap length and depth, or rotate the finished sketch.
 - **Shapes are plain sketch geometry, not a Fusion pattern.** They are not associative — changing the source later does not update them. That is deliberate: the result is ordinary curves you can trim, constrain and extrude without a pattern feature in the way.
