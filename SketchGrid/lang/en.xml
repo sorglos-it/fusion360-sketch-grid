@@ -24,6 +24,8 @@ Fixed number of columns and rows, or as many as fit into an area.</string>
   <string key="shape.slot">Slot</string>
   <string key="shape.polygon">Polygon</string>
   <string key="in.sides">Sides</string>
+  <string key="in.regular">Regular</string>
+  <string key="regular.tooltip">Keeps the polygon equilateral instead of stretching it to length x depth. The smaller of the two then sets its size, and the pitch follows the actual shape - so the gap you set is the gap you get either way.</string>
   <string key="in.width">Length (X)</string>
   <string key="in.height">Depth (Y)</string>
   <string key="in.gap_x">Gap X</string>

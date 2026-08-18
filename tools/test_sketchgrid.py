@@ -39,9 +39,11 @@ def check(condition, message):
 
 def layout(mode=sg.MODE_COUNT, width=10 * MM, height=5 * MM, gap_x=2 * MM,
            gap_y=2 * MM, columns=8, rows=4, area_width=100 * MM,
-           area_height=40 * MM, anchor=0, offset_x=0.0, offset_y=0.0):
+           area_height=40 * MM, anchor=0, offset_x=0.0, offset_y=0.0,
+           shape=sg.SHAPE_RECTANGLE, sides=6, regular=False):
     return sg.grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
-                          area_width, area_height, anchor, offset_x, offset_y)
+                          area_width, area_height, anchor, offset_x, offset_y,
+                          shape, sides, regular)
 
 
 def expect_error(key, label, **kwargs):
@@ -53,7 +55,8 @@ def expect_error(key, label, **kwargs):
 
 
 print("1) The example from the brief: 10 x 5, gap 2, 8 columns, 4 rows")
-columns, rows, pitch_x, pitch_y, total_w, total_h, off_x, off_y = layout()
+(columns, rows, pitch_x, pitch_y, total_w, total_h,
+ off_x, off_y, extent_x, extent_y) = layout()
 check((columns, rows) == (8, 4), 'grid is 8 x 4 (%d x %d)' % (columns, rows))
 check(abs(pitch_x - 12 * MM) < 1e-12 and abs(pitch_y - 7 * MM) < 1e-12,
       'pitch is 12 x 7 mm')
@@ -249,8 +252,70 @@ check(layout(mode=sg.MODE_FILL, offset_x=50 * MM)[0]
       == layout(mode=sg.MODE_FILL)[0],
       'in fill mode the offset does not change how many fit')
 
-print('8) Every drop-down entry has a text of its own')
-for key in ('in.offset_x', 'in.offset_y', 'offset.tooltip'):
+print('8) The gap is the gap, whatever the shape')
+# Regression: a hexagon in a 10 x 5 cell only measures cos(30) * 5 = 4.33 mm
+# across, but the pitch used to be built from the full cell width, leaving
+# 12 - 4.33 = 7.67 mm between neighbours instead of the 2 mm asked for.
+for shape, label in ((sg.SHAPE_RECTANGLE, 'rectangle'),
+                     (sg.SHAPE_ELLIPSE, 'ellipse'),
+                     (sg.SHAPE_SLOT, 'slot'),
+                     (sg.SHAPE_POLYGON, 'polygon, stretched')):
+    result = layout(shape=shape)
+    extent_x, extent_y = result[8], result[9]
+    check(abs(result[2] - extent_x - 2 * MM) < 1e-12
+          and abs(result[3] - extent_y - 2 * MM) < 1e-12,
+          '%s: gap %.3f / %.3f mm' % (label, (result[2] - extent_x) * 10,
+                                      (result[3] - extent_y) * 10))
+    check(abs(extent_x - 10 * MM) < 1e-12 and abs(extent_y - 5 * MM) < 1e-12,
+          '%s: fills the cell, 10.00 x 5.00 mm' % label)
+
+hexagon = layout(shape=sg.SHAPE_POLYGON, sides=6, regular=True)
+extent_x, extent_y = hexagon[8], hexagon[9]
+check(abs(extent_x - 4.330127 * MM) < 1e-6,
+      'regular hexagon is %.4f mm across, not 10' % (extent_x * 10))
+check(abs(extent_y - 5 * MM) < 1e-12,
+      'and %.4f mm tall, the smaller cell edge' % (extent_y * 10))
+check(abs(hexagon[2] - extent_x - 2 * MM) < 1e-12
+      and abs(hexagon[3] - extent_y - 2 * MM) < 1e-12,
+      'regular hexagon: gap %.3f / %.3f mm, pitch follows the shape'
+      % ((hexagon[2] - extent_x) * 10, (hexagon[3] - extent_y) * 10))
+check(abs(hexagon[2] - 6.330127 * MM) < 1e-6,
+      'pitch is %.4f mm, not the old 12.00' % (hexagon[2] * 10))
+
+print('   the unit polygon box is measured, not assumed')
+# With the first vertex at 90 degrees, 4 and 8 corners put a vertex on every
+# axis, so they span the full diameter both ways; 3 and 6 do not.
+for sides, span_x, span_y in ((3, 1.732051, 1.5), (4, 2.0, 2.0),
+                              (6, 1.732051, 2.0), (8, 2.0, 2.0)):
+    box = sg.polygon_box(sides)
+    check(abs(box[0] - span_x) < 1e-6 and abs(box[1] - span_y) < 1e-6,
+          '%d sides: %.4f x %.4f' % (sides, box[0], box[1]))
+# A pentagon has a vertex at the top but a flat bottom, so its box reaches
+# further up than down and its centre is not the circumcircle centre.
+check(abs(sg.polygon_box(5)[3] - 0.095492) < 1e-6,
+      'pentagon box centre sits %.6f above the circumcircle centre'
+      % sg.polygon_box(5)[3])
+
+print('   stretching gives the cell exactly, for any corner count')
+for sides in range(3, 13):
+    span_x, span_y, _mx, _my = sg.polygon_box(sides)
+    scaled_x = 10 * MM / span_x * span_x
+    scaled_y = 5 * MM / span_y * span_y
+    check(abs(scaled_x - 10 * MM) < 1e-12 and abs(scaled_y - 5 * MM) < 1e-12,
+          '%d sides: bounding box 10.00 x 5.00 mm' % sides)
+
+print('   fill mode counts the real footprint')
+plain = layout(mode=sg.MODE_FILL, shape=sg.SHAPE_POLYGON, sides=6)
+tight = layout(mode=sg.MODE_FILL, shape=sg.SHAPE_POLYGON, sides=6, regular=True)
+check(tight[0] > plain[0],
+      'a regular hexagon is narrower, so more fit across (%d vs %d)'
+      % (tight[0], plain[0]))
+check(tight[4] <= 100 * MM + 1e-12,
+      'and the grid still stays inside the area (%.2f mm)' % (tight[4] * 10))
+
+print('9) Every drop-down entry has a text of its own')
+for key in ('in.offset_x', 'in.offset_y', 'offset.tooltip',
+            'in.regular', 'regular.tooltip'):
     check(key in reference, '%s present' % key)
 for label, keys in (('mode', sg.MODE_KEYS), ('shape', sg.SHAPE_KEYS),
                     ('anchor', sg.ANCHOR_KEYS)):
@@ -260,7 +325,7 @@ for label, keys in (('mode', sg.MODE_KEYS), ('shape', sg.SHAPE_KEYS),
 check(len(sg.ANCHOR_KEYS) == len(sg.ANCHOR_FACTORS),
       'every anchor entry has a factor pair')
 
-print('9) Text catalogue')
+print('10) Text catalogue')
 for code in sg.core.SUPPORTED_LANGUAGES:
     sg.S.load(code)
     check(sg.S.code == code and sg.T('cmd.name') != 'cmd.name',

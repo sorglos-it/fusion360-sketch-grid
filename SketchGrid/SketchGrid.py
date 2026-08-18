@@ -40,6 +40,7 @@ IN_POINT = 'sgPoint'
 IN_MODE = 'sgMode'
 IN_SHAPE = 'sgShape'
 IN_SIDES = 'sgSides'
+IN_REGULAR = 'sgRegular'
 IN_WIDTH = 'sgWidth'
 IN_HEIGHT = 'sgHeight'
 IN_GAP_X = 'sgGapX'
@@ -93,6 +94,7 @@ _last = {
     IN_MODE: MODE_COUNT,
     IN_SHAPE: SHAPE_RECTANGLE,
     IN_SIDES: 6,
+    IN_REGULAR: False,
     IN_WIDTH: 1.0,          # 10 mm
     IN_HEIGHT: 0.5,         # 5 mm
     IN_GAP_X: 0.2,          # 2 mm
@@ -130,12 +132,49 @@ def mm(value):
 
 # ============================================================ YOUR CODE HERE ==
 
+def polygon_unit_points(sides, start=math.pi / 2.0):
+    """Corners of a polygon on the unit circle, the first one pointing up."""
+    step = 2.0 * math.pi / sides
+    return [(math.cos(start + i * step), math.sin(start + i * step))
+            for i in range(sides)]
+
+
+def polygon_box(sides):
+    """Bounding box of the unit polygon: (span_x, span_y, mid_x, mid_y).
+
+    A polygon only has a vertex on every extreme when the corner count suits
+    it, so the box is neither the circumcircle nor necessarily centred on it -
+    a pentagon sits low in its own box. Everything else scales off this.
+    """
+    points = polygon_unit_points(sides)
+    xs = [p[0] for p in points]
+    ys = [p[1] for p in points]
+    return (max(xs) - min(xs), max(ys) - min(ys),
+            (min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0)
+
+
+def shape_extent(shape, width, height, sides, regular):
+    """How much room one drawn shape actually takes up.
+
+    Rectangle, ellipse, slot and a stretched polygon all fill their cell, so
+    this is simply length x depth. A regular polygon cannot fill a cell of the
+    wrong proportions, so it reports its own footprint and the pitch follows
+    that instead - otherwise the gap you ask for is not the gap you get.
+    """
+    if shape == SHAPE_POLYGON and regular:
+        span_x, span_y, _mid_x, _mid_y = polygon_box(sides)
+        radius = min(width, height) / 2.0
+        return (span_x * radius, span_y * radius)
+    return (width, height)
+
+
 def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
-                area_width, area_height, anchor, offset_x=0.0, offset_y=0.0):
+                area_width, area_height, anchor, offset_x=0.0, offset_y=0.0,
+                shape=SHAPE_RECTANGLE, sides=6, regular=False):
     """Work out the grid without touching Fusion.
 
     Returns (columns, rows, pitch_x, pitch_y, total_width, total_height,
-    origin_x, origin_y), where the origin places the lower left corner of the
+    origin_x, origin_y, extent_x, extent_y), where the origin places the lower left corner of the
     bounding box relative to the picked point. The anchor decides where the
     point sits in the grid; offset_x and offset_y then shift the whole thing
     away from it, which is how you keep a margin without moving the point.
@@ -150,8 +189,9 @@ def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
     if gap_x < -EPS or gap_y < -EPS:
         fail('err.gap_negative')
 
-    pitch_x = width + gap_x
-    pitch_y = height + gap_y
+    extent_x, extent_y = shape_extent(shape, width, height, sides, regular)
+    pitch_x = extent_x + gap_x
+    pitch_y = extent_y + gap_y
 
     if mode == MODE_FILL:
         if area_width <= EPS or area_height <= EPS:
@@ -160,7 +200,8 @@ def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
         columns = int(math.floor((area_width + gap_x) / pitch_x + 1e-9))
         rows = int(math.floor((area_height + gap_y) / pitch_y + 1e-9))
         if columns < 1 or rows < 1:
-            fail('err.area_too_small', '%.2f' % mm(width), '%.2f' % mm(height))
+            fail('err.area_too_small', '%.2f' % mm(extent_x),
+                 '%.2f' % mm(extent_y))
     else:
         if columns < 1:
             fail('err.columns')
@@ -176,13 +217,14 @@ def grid_layout(mode, width, height, gap_x, gap_y, columns, rows,
     factor_x, factor_y = ANCHOR_FACTORS[anchor]
     return (columns, rows, pitch_x, pitch_y, total_width, total_height,
             -factor_x * total_width + offset_x,
-            -factor_y * total_height + offset_y)
+            -factor_y * total_height + offset_y,
+            extent_x, extent_y)
 
 
 def cell_centres(layout):
     """Centre of every cell, relative to the picked point, row by row."""
-    (columns, rows, pitch_x, pitch_y,
-     _total_width, _total_height, origin_x, origin_y) = layout
+    (columns, rows, pitch_x, pitch_y, _total_width, _total_height,
+     origin_x, origin_y, _extent_x, _extent_y) = layout
     out = []
     for row in range(rows):
         for column in range(columns):
@@ -255,18 +297,22 @@ def _draw_slot(sketch, cx, cy, width, height):
                               at(radius, -straight))
 
 
-def _draw_polygon(sketch, cx, cy, width, height, sides):
-    """Regular polygon, first vertex pointing up.
+def _draw_polygon(sketch, cx, cy, width, height, sides, regular):
+    """Polygon with the first vertex pointing up, centred on its own box.
 
-    A regular polygon cannot fill a non-square cell, so it takes the smaller of
-    the two dimensions as its diameter and sits centred in the cell.
+    Stretched so its bounding box is exactly the cell, unless `regular` is set,
+    in which case the smaller of the two dimensions sets its size and it stays
+    equilateral.
     """
-    radius = min(width, height) / 2.0
-    step = 2.0 * math.pi / sides
-    start = math.pi / 2.0
-    corners = [_point(cx + radius * math.cos(start + i * step),
-                      cy + radius * math.sin(start + i * step))
-               for i in range(sides)]
+    unit = polygon_unit_points(sides)
+    span_x, span_y, mid_x, mid_y = polygon_box(sides)
+    if regular:
+        scale_x = scale_y = min(width, height) / 2.0
+    else:
+        scale_x = width / span_x
+        scale_y = height / span_y
+    corners = [_point(cx + (px - mid_x) * scale_x, cy + (py - mid_y) * scale_y)
+               for px, py in unit]
 
     lines = sketch.sketchCurves.sketchLines
     first = lines.addByTwoPoints(corners[0], corners[1])
@@ -276,13 +322,13 @@ def _draw_polygon(sketch, cx, cy, width, height, sides):
     lines.addByTwoPoints(previous.endSketchPoint, first.startSketchPoint)
 
 
-def _draw_shape(sketch, shape, cx, cy, width, height, sides):
+def _draw_shape(sketch, shape, cx, cy, width, height, sides, regular):
     if shape == SHAPE_ELLIPSE:
         _draw_ellipse(sketch, cx, cy, width, height)
     elif shape == SHAPE_SLOT:
         _draw_slot(sketch, cx, cy, width, height)
     elif shape == SHAPE_POLYGON:
-        _draw_polygon(sketch, cx, cy, width, height, sides)
+        _draw_polygon(sketch, cx, cy, width, height, sides, regular)
     else:
         _draw_rectangle(sketch, cx, cy, width, height)
 
@@ -304,6 +350,7 @@ def read_inputs(inputs):
         shape=shape_item.index if shape_item else SHAPE_RECTANGLE,
         anchor=anchor_item.index if anchor_item else 0,
         sides=inputs.itemById(IN_SIDES).value,
+        regular=inputs.itemById(IN_REGULAR).value,
         width=inputs.itemById(IN_WIDTH).value,
         height=inputs.itemById(IN_HEIGHT).value,
         gap_x=inputs.itemById(IN_GAP_X).value,
@@ -322,7 +369,8 @@ def layout_of(values):
                        values['gap_x'], values['gap_y'], values['columns'],
                        values['rows'], values['area_width'],
                        values['area_height'], values['anchor'],
-                       values['offset_x'], values['offset_y'])
+                       values['offset_x'], values['offset_y'],
+                       values['shape'], values['sides'], values['regular'])
 
 
 def validate(values):
@@ -339,7 +387,9 @@ def build_result(values):
     sketch = point.parentSketch
     origin = point.geometry
     layout = layout_of(values)
-    half_w, half_h = values['width'] / 2.0, values['height'] / 2.0
+    # Centre each shape in its own footprint, which is the cell for everything
+    # except a regular polygon.
+    half_w, half_h = layout[8] / 2.0, layout[9] / 2.0
 
     # isComputeDeferred keeps the solver quiet until every shape is drawn -
     # with a few hundred cells that is the difference between instant and
@@ -349,7 +399,8 @@ def build_result(values):
         for dx, dy in cell_centres(layout):
             _draw_shape(sketch, values['shape'],
                         origin.x + dx + half_w, origin.y + dy + half_h,
-                        values['width'], values['height'], values['sides'])
+                        values['width'], values['height'], values['sides'],
+                        values['regular'])
     finally:
         sketch.isComputeDeferred = False
 
@@ -383,6 +434,11 @@ def build_inputs(inputs):
     sides = inputs.addIntegerSpinnerCommandInput(
         IN_SIDES, T('in.sides'), MIN_SIDES, MAX_SIDES, 1, _last[IN_SIDES])
     sides.isVisible = _last[IN_SHAPE] == SHAPE_POLYGON
+
+    regular = inputs.addBoolValueInput(IN_REGULAR, T('in.regular'), True, '',
+                                       _last[IN_REGULAR])
+    regular.tooltip = T('regular.tooltip')
+    regular.isVisible = _last[IN_SHAPE] == SHAPE_POLYGON
 
     inputs.addValueInput(IN_WIDTH, T('in.width'), 'mm',
                          adsk.core.ValueInput.createByReal(_last[IN_WIDTH]))
@@ -426,6 +482,7 @@ def build_inputs(inputs):
 def remember(values):
     for key, name in ((IN_MODE, 'mode'), (IN_SHAPE, 'shape'),
                       (IN_ANCHOR, 'anchor'), (IN_SIDES, 'sides'),
+                      (IN_REGULAR, 'regular'),
                       (IN_WIDTH, 'width'), (IN_HEIGHT, 'height'),
                       (IN_GAP_X, 'gap_x'), (IN_GAP_Y, 'gap_y'),
                       (IN_COLUMNS, 'columns'), (IN_ROWS, 'rows'),
@@ -446,7 +503,9 @@ def refresh(inputs):
     inputs.itemById(IN_ROWS).isVisible = fixed
     inputs.itemById(IN_AREA_WIDTH).isVisible = not fixed
     inputs.itemById(IN_AREA_HEIGHT).isVisible = not fixed
-    inputs.itemById(IN_SIDES).isVisible = values['shape'] == SHAPE_POLYGON
+    is_polygon = values['shape'] == SHAPE_POLYGON
+    inputs.itemById(IN_SIDES).isVisible = is_polygon
+    inputs.itemById(IN_REGULAR).isVisible = is_polygon
 
     _updating = True
     try:

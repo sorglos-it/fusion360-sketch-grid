@@ -19,6 +19,8 @@ Feste Anzahl Spalten und Zeilen, oder so viele wie in eine Fläche passen.</stri
   <string key="shape.slot">Langloch</string>
   <string key="shape.polygon">Vieleck</string>
   <string key="in.sides">Ecken</string>
+  <string key="in.regular">Regelmäßig</string>
+  <string key="regular.tooltip">Hält das Vieleck gleichseitig, statt es auf Länge × Tiefe zu strecken. Die kleinere der beiden bestimmt dann die Größe, und die Teilung folgt der tatsächlichen Form - der Abstand stimmt so oder so.</string>
   <string key="in.width">Länge (X)</string>
   <string key="in.height">Tiefe (Y)</string>
   <string key="in.gap_x">Abstand X</string>

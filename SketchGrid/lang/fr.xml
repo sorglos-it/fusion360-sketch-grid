@@ -19,6 +19,8 @@ Nombre fixe de colonnes et de lignes, ou autant qu'il en tient dans une zone.</s
   <string key="shape.slot">Trou oblong</string>
   <string key="shape.polygon">Polygone</string>
   <string key="in.sides">Côtés</string>
+  <string key="in.regular">Régulier</string>
+  <string key="regular.tooltip">Garde le polygone équilatéral au lieu de l'étirer à la longueur × la profondeur. La plus petite des deux fixe alors sa taille et le pas suit la forme réelle - l'écart demandé est respecté dans les deux cas.</string>
   <string key="in.width">Longueur (X)</string>
   <string key="in.height">Profondeur (Y)</string>
   <string key="in.gap_x">Écart X</string>

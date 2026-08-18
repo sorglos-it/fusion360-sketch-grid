@@ -19,6 +19,8 @@ Numero fisso di colonne e righe, oppure quante ne stanno in un'area.</string>
   <string key="shape.slot">Asola</string>
   <string key="shape.polygon">Poligono</string>
   <string key="in.sides">Lati</string>
+  <string key="in.regular">Regolare</string>
+  <string key="regular.tooltip">Mantiene il poligono equilatero invece di allungarlo a lunghezza × profondità. La minore delle due ne determina la dimensione e il passo segue la forma reale - la distanza impostata viene rispettata in entrambi i casi.</string>
   <string key="in.width">Lunghezza (X)</string>
   <string key="in.height">Profondità (Y)</string>
   <string key="in.gap_x">Distanza X</string>

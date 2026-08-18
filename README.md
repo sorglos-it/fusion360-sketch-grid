@@ -20,7 +20,7 @@ See also **[fusion360-dovetail](https://github.com/sorglos-it/fusion360-dovetail
 - **Four shapes** — rectangle, circle/ellipse, slot with rounded ends, regular polygon from 3 to 24 sides
 - **Nine anchor positions** — the picked point can be the middle of the grid, any corner, or the middle of any edge
 - **Offset X / Y** — shift the grid off the point to hold a margin, without moving the point
-- **Separate gaps** for X and Y, zero allowed for shapes that touch
+- **Separate gaps** for X and Y, zero allowed for shapes that touch — and the gap is measured between the shapes themselves, whatever their form
 - **Live read-out** — *8 × 4 = 32 shapes, 94 × 26 mm overall*, updated as you type
 - **Live preview** — the sketch updates while the dialog is open
 - **Explained refusals** — an area too small for a single shape says how big it would have to be
@@ -65,6 +65,7 @@ Worked example, the one the add-in was built around: length 10 mm, depth 5 mm, g
 | **Count from** | `Columns and rows` or `Fitting an area`. Switches which fields below are shown. |
 | **Shape** | `Rectangle`, `Circle / ellipse`, `Slot`, `Polygon`. |
 | **Sides** | Polygon only: 3 to 24. |
+| **Regular** | Polygon only. Off: stretched to fill the cell. On: equilateral, sized by the smaller cell edge, and the pitch follows the shape. |
 | **Length (X)** / **Depth (Y)** | The size of one cell. |
 | **Gap X** / **Gap Y** | Space between neighbours. 0 makes them touch. |
 | **Columns** / **Rows** | Fixed mode: the count outright. |
@@ -124,7 +125,22 @@ Count, pitch and overall size are untouched by the offset, and in *fill an area*
 | **Rectangle** | Length × depth | The plain case. |
 | **Circle / ellipse** | Length and depth as the two axes | Equal values give a true circle, unequal an ellipse with the major axis on the longer side. |
 | **Slot** | Rectangle with semicircular ends | Rounded on the shorter axis; the radius is half of it. Equal length and depth make a circle. |
-| **Polygon** | Regular, first vertex pointing up | A regular polygon cannot fill a non-square cell, so it takes the **smaller** of the two dimensions as its diameter and sits centred. A 6-sided polygon in a 10 × 5 cell is 5 mm across, not 10. |
+| **Polygon** | Length × depth, first vertex pointing up | Stretched to fill the cell, so its bounding box is exactly length × depth for any corner count. Tick **Regular** to keep it equilateral instead — then the smaller cell edge sets its size. |
+
+## The gap is measured between the shapes
+
+Every shape fills its cell, so the pitch is `size + gap` and the space you see between two neighbours is the gap you asked for. That holds for the rectangle, the ellipse, the slot and a stretched polygon alike.
+
+A **regular** polygon is the one shape that cannot fill a cell of the wrong proportions — it has a single diameter. So it reports its own footprint and the pitch follows that instead:
+
+| 10 × 5 cell, gap 2, hexagon | Shape | Pitch | Gap |
+|---|---|---|---|
+| stretched (default) | 10.00 × 5.00 | 12.00 × 7.00 | 2.00 / 2.00 |
+| regular | 4.33 × 5.00 | 6.33 × 7.00 | 2.00 / 2.00 |
+
+A regular hexagon is only `cos(30°) × 5 = 4.33 mm` across, and up to 1.2.0 the pitch was still built from the full cell width — which left 7.67 mm between neighbours instead of 2. Fixed in 1.3.0.
+
+The footprint is measured, not assumed: with the first vertex at 90°, a square and an octagon span the full diameter both ways while a triangle and a hexagon do not, and a pentagon is not even centred on its own bounding box.
 
 ## How it works
 

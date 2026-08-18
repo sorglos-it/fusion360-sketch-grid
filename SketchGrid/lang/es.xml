@@ -19,6 +19,8 @@ Número fijo de columnas y filas, o tantas como quepan en un área.</string>
   <string key="shape.slot">Ranura</string>
   <string key="shape.polygon">Polígono</string>
   <string key="in.sides">Lados</string>
+  <string key="in.regular">Regular</string>
+  <string key="regular.tooltip">Mantiene el polígono equilátero en lugar de estirarlo a longitud × profundidad. La menor de las dos fija su tamaño y el paso sigue la forma real: la separación indicada se respeta en ambos casos.</string>
   <string key="in.width">Longitud (X)</string>
   <string key="in.height">Profundidad (Y)</string>
   <string key="in.gap_x">Separación X</string>
