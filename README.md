@@ -67,6 +67,7 @@ Worked example, the one the add-in was built around: length 10 mm, depth 5 mm, g
 | **Area width** / **Area height** | Fill mode: the space to fill. |
 | **Point sits** | Where the picked point is in the grid: middle, a corner, or the middle of an edge. |
 | **Result** | Read-only: how many shapes and how big the grid comes out. |
+| *(bottom right)* | The installed version, read from the manifest. |
 
 ## The two modes
 

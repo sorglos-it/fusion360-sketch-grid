@@ -50,6 +50,7 @@ IN_AREA_WIDTH = 'sgAreaWidth'
 IN_AREA_HEIGHT = 'sgAreaHeight'
 IN_ANCHOR = 'sgAnchor'
 IN_INFO = 'sgInfo'
+IN_VERSION = 'sgVersion'
 
 RESOURCE_FOLDER = os.path.join(_DIR, 'resources', 'SketchGrid')
 LANG_DIR = os.path.join(_DIR, 'lang')
@@ -404,6 +405,8 @@ def build_inputs(inputs):
         anchor.listItems.add(T(key), index == _last[IN_ANCHOR])
 
     inputs.addTextBoxCommandInput(IN_INFO, T('in.info'), '', 1, True)
+    core.add_version_label(inputs, IN_VERSION,
+                           core.read_version(_DIR, 'SketchGrid'))
     return selection
 
 
