@@ -34,15 +34,18 @@ See also **[fusion360-dovetail](https://github.com/sorglos-it/fusion360-dovetail
 
 ## Installation
 
-1. Copy the `SketchGrid` folder into the Fusion add-ins directory:
+1. Download the latest `SketchGrid-*.zip` from **[Releases](https://github.com/sorglos-it/fusion360-sketch-grid/releases)** — or clone this repository and use the `SketchGrid` folder as it is.
+2. Unpack it into the Fusion add-ins directory, so that `SketchGrid\SketchGrid.py` ends up one level below it:
 
    | OS | Path |
    |---|---|
    | Windows | `%APPDATA%\Autodesk\Autodesk Fusion 360\API\AddIns\` |
    | macOS | `~/Library/Application Support/Autodesk/Autodesk Fusion 360/API/AddIns/` |
 
-2. In Fusion: **Utilities → ADD-INS → Add-Ins**, select the entry, tick *Run on Startup*, press **Run**.
-3. The button appears on the **SKETCH** tab in the **CREATE** panel, with the installed version in brackets after its name.
+3. In Fusion: **Utilities → ADD-INS → Add-Ins**, select the entry, tick *Run on Startup*, press **Run**.
+4. The button appears on the **SKETCH** tab in the **CREATE** panel, with the installed version in brackets after its name.
+
+Replacing an older copy: stop the add-in in Fusion first, otherwise the running one stays in memory.
 
 ## Usage
 
